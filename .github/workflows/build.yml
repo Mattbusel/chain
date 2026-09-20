@@ -27,7 +27,9 @@ jobs:
       - name: Screenshots
         timeout-minutes: 15
         run: |
-          udid=$UDID
+          # A fresh device: bootstatus on the runner's default simulator hung for 15+ minutes before.
+          rt=$(xcrun simctl list runtimes | grep -oE "com.apple.CoreSimulator.SimRuntime.iOS-[0-9-]+" | sort -V | tail -1)
+          udid=$(xcrun simctl create shots "com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro-Max" "$rt")
           xcrun simctl shutdown all || true
           xcrun simctl boot "$udid" || true
           for i in $(seq 1 60); do
