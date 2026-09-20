@@ -1,1 +1,1 @@
-habit,habits,streak,tracker,routine,daily,goals,productivity,self improvement,discipline,heatmap,chain
+habit,habits,streak,tracker,routine,daily,goals,productivity,discipline,heatmap,chain
