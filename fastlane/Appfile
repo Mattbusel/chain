@@ -1,0 +1,3 @@
+app_identifier("com.mattbusel.chainhabits")
+# No apple_id or team_id. Authentication is entirely by App Store Connect API
+# key from the environment, so this file is safe in a public repo.

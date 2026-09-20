@@ -1,0 +1,23 @@
+Chain is a habit tracker that takes five seconds a day and makes the pattern impossible to ignore.
+
+Tick the habit, watch the ring fill, and keep the chain. Every habit gets a year of squares stitched like a quilt: lime where you did it, a hole where you did not.
+
+TODAY
+• Big tactile tiles, one tap to log, a completion ring for the day
+• A fourteen-day strip under each habit and the current streak beside it
+
+HABITS THAT FIT REAL LIFE
+• Every day, certain weekdays, or a number of times a week
+• Weekly habits count in weeks, not days, so a Tuesday off does not break a three-a-week chain
+• Twenty icons, start dates, an optional daily reminder
+
+WEEK
+• A grid of the week to log or undo any day, faded where a habit is not due
+
+YEAR
+• Twenty-six weeks of squares per habit, with totals, best chain and the completion rate
+
+STATS
+• Check-ins all time, 30-day completion, longest chain, perfect days, and which weekdays you actually do the work
+
+No account, no ads, no tracking. Everything stays on your phone.

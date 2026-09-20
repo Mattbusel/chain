@@ -1,0 +1,14 @@
+app_identifier("com.mattbusel.chainhabits")
+
+# No price_tier here. It makes deliver PATCH the app with attributes Apple has
+# removed from the `apps` resource, and the whole upload is rejected after the
+# binary is already built. Price is set through appPriceSchedules by
+# Store/listing.py instead.
+
+copyright("#{Time.now.year} Matthew Busel")
+
+submission_information({
+  add_id_info_uses_idfa: false,
+  export_compliance_uses_encryption: false,
+  content_rights_contains_third_party_content: false
+})

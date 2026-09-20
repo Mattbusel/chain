@@ -1,0 +1,172 @@
+# Chain — App Store pipeline.
+#
+# Everything from a clean checkout to "Waiting for Review", with no Mac in
+# anyone's hands. The one thing a human still does is push a commit.
+#
+# Secrets this expects in the environment (GitHub Actions secrets):
+#
+#   ASC_KEY_ID        the App Store Connect API key id     (e.g. 7ZMV4Z7XB8)
+#   ASC_ISSUER_ID     the issuer uuid from the Keys page
+#   ASC_KEY_CONTENT   the contents of the AuthKey_XXXX.p8, base64 encoded
+#   DEVELOPMENT_TEAM  the ten character team id
+#
+# The .p8 is never committed. It is decoded into memory by the api key action
+# and used to mint a short-lived token per run.
+
+default_platform(:ios)
+
+APP_IDENTIFIER = "com.mattbusel.chainhabits"
+SCHEME = "Chain"
+
+platform :ios do
+  # Load the API key once and hand it to everything downstream.
+  #
+  # `in_house: false` matters: it is what tells fastlane this is a normal paid
+  # developer account rather than an enterprise one, and getting it wrong
+  # produces an authentication error that says nothing useful.
+  def asc_key
+    app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_content: ENV.fetch("ASC_KEY_CONTENT"),
+      is_key_content_base64: true,
+      in_house: false
+    )
+  end
+
+  desc "Generate the Xcode project from project.yml"
+  lane :generate do
+    # The .xcodeproj is not committed. It is generated here so the repo can be
+    # authored on any OS and there is never a merge conflict in a pbxproj.
+    sh("cd .. && xcodegen generate")
+  end
+
+  desc "Build a signed App Store archive"
+  lane :build do
+    generate
+    api_key = asc_key
+
+    # A throwaway keychain for this job, unlocked, and set as the default.
+    # Without it there is nowhere to install a certificate on a CI runner.
+    setup_ci
+
+    # Create the distribution certificate and the App Store profile explicitly,
+    # rather than letting automatic signing do it.
+    #
+    # Automatic signing cannot work on this account. `xcodebuild archive`
+    # resolves a *development* profile during the archive phase and only applies
+    # distribution at export time, and a development profile requires at least
+    # one registered device. A team with no devices therefore fails with
+    # "Your team has no devices from which to generate a provisioning profile"
+    # on an App Store build, which is a confusing thing to be told, because
+    # distribution needs no devices whatsoever.
+    #
+    # Asking for the distribution certificate and an App Store profile directly
+    # sidesteps the development step that cannot succeed.
+    # The certificate is imported by the workflow before fastlane runs, not
+    # created here.
+    #
+    # get_certificates generates the private key on the runner, and that key
+    # dies with the runner. The certificate Apple keeps is then permanently
+    # unusable: it cannot be recovered, only revoked, and Apple caps how many
+    # distribution certificates an account may hold. Three failed runs had
+    # already orphaned three certificates before this was noticed.
+    #
+    # Store/signing.py generates the key locally, has Apple sign it, and stores
+    # the result as a .p12 in GitHub secrets. One identity, reused forever.
+    # No :adhoc or :development arguments, not even set to false. fastlane
+    # treats their presence as selecting that profile type and refuses with
+    # "You can't enable both :development and :adhoc". Absent, it produces the
+    # App Store profile, which is what is wanted.
+    get_provisioning_profile(
+      api_key: api_key,
+      app_identifier: APP_IDENTIFIER,
+      force: true
+    )
+    profile_name = lane_context[SharedValues::SIGH_NAME]
+    UI.message("signing with profile: #{profile_name}")
+
+    # One above whatever App Store Connect already has, so a rebuild of the same
+    # version never collides.
+    #
+    # Passed as a build setting rather than through increment_build_number: that
+    # action drives agvtool, which needs project settings this project does not
+    # have, and failed with `Cannot find "Chain.xcodeproj/../YES"`.
+    next_build = latest_testflight_build_number(
+      api_key: api_key,
+      app_identifier: APP_IDENTIFIER,
+      initial_build_number: 0
+    ) + 1
+    UI.message("building as build number #{next_build}")
+
+    build_app(
+      scheme: SCHEME,
+      export_method: "app-store",
+      xcargs: [
+        "CODE_SIGN_STYLE=Manual",
+        "PROVISIONING_PROFILE_SPECIFIER='#{profile_name}'",
+        "CODE_SIGN_IDENTITY='Apple Distribution'",
+        "CURRENT_PROJECT_VERSION=#{next_build}",
+      ].join(" "),
+      export_options: {
+        signingStyle: "manual",
+        teamID: ENV.fetch("DEVELOPMENT_TEAM"),
+        provisioningProfiles: { APP_IDENTIFIER => profile_name }
+      },
+      output_directory: "build",
+      output_name: "Chain.ipa"
+    )
+  end
+
+  desc "Upload the binary, metadata and screenshots, then submit for review"
+  lane :release do
+    # Deliberately does not re-capture.
+    #
+    # fastlane/screenshots is committed, so the images that ship are the exact
+    # ones that were reviewed and approved rather than a fresh set nobody has
+    # looked at. It also takes ten minutes off every retry of the signing step,
+    # which matters when signing is the part that goes wrong.
+    #
+    # Run the `screenshots` action to refresh them after a UI change.
+    build
+
+    upload_to_app_store(
+      api_key: asc_key,
+      app_identifier: APP_IDENTIFIER,
+      ipa: "build/Chain.ipa",
+      # Everything below comes out of fastlane/metadata and fastlane/screenshots.
+      skip_metadata: false,
+      skip_screenshots: false,
+      # Submit, rather than leaving it sitting in Connect for a human to press
+      # the button on. This is the last step and it is the irreversible one.
+      submit_for_review: true,
+      automatic_release: false,
+      force: true,
+      precheck_include_in_app_purchases: false,
+      submission_information: {
+        # No ads, no tracking, no third party analytics, nothing exported. All
+        # true, and all of it is what makes the review short.
+        add_id_info_uses_idfa: false,
+        export_compliance_uses_encryption: false,
+        content_rights_contains_third_party_content: false
+      }
+    )
+  end
+
+  desc "Everything except the irreversible last step"
+  lane :dry_run do
+    build
+    upload_to_app_store(
+      api_key: asc_key,
+      app_identifier: APP_IDENTIFIER,
+      ipa: "build/Chain.ipa",
+      skip_metadata: false,
+      skip_screenshots: false,
+      # The difference between this lane and `release`. Everything lands in App
+      # Store Connect and nothing is submitted, so the listing can be looked at
+      # before it goes to Apple.
+      submit_for_review: false,
+      force: true
+    )
+  end
+end

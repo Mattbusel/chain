@@ -1,0 +1,71 @@
+name: Build
+on:
+  workflow_dispatch:
+  push:
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode 26
+        run: |
+          chosen=""
+          for app in $(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -Vr); do
+            if [ -d "$app/Contents/Developer" ]; then chosen="$app"; break; fi
+          done
+          [ -z "$chosen" ] && { ls /Applications | grep -i xcode; exit 1; }
+          sudo xcode-select -s "$chosen/Contents/Developer"
+      - run: brew install xcodegen && xcodegen generate
+      - name: Build for simulator
+        run: |
+          set -o pipefail
+          name=$(xcrun simctl list devices available | grep -oE "iPhone [0-9]+ Pro Max" | sort -Vr | head -1)
+          udid=$(xcrun simctl list devices available | grep "$name (" | head -1 | grep -oE "[0-9A-F-]{36}")
+          echo "UDID=$udid" >> "$GITHUB_ENV"
+          xcodebuild build -project Chain.xcodeproj -scheme Chain -configuration Debug             -destination "id=$udid" -derivedDataPath dd CODE_SIGNING_ALLOWED=NO | xcpretty
+      - name: Screenshots
+        timeout-minutes: 15
+        run: |
+          udid=$UDID
+          xcrun simctl shutdown all || true
+          xcrun simctl boot "$udid" || true
+          for i in $(seq 1 60); do
+            xcrun simctl spawn "$udid" launchctl print system >/dev/null 2>&1 && break
+            sleep 5
+          done
+          sleep 20
+          xcrun simctl status_bar "$udid" override --time "9:41" --batteryState charged --batteryLevel 100 || true
+          xcrun simctl ui "$udid" appearance dark || true
+          app=$(find dd/Build/Products -name "Chain.app" -path "*iphonesimulator*" | head -1)
+          xcrun simctl install "$udid" "$app"
+          mkdir -p shots
+          xcrun simctl terminate "$udid" com.mattbusel.chainhabits || true
+          xcrun simctl launch "$udid" com.mattbusel.chainhabits -shot today
+          sleep 7
+          xcrun simctl io "$udid" screenshot "shots/00.png"
+          xcrun simctl terminate "$udid" com.mattbusel.chainhabits || true
+          xcrun simctl launch "$udid" com.mattbusel.chainhabits -shot week
+          sleep 7
+          xcrun simctl io "$udid" screenshot "shots/01.png"
+          xcrun simctl terminate "$udid" com.mattbusel.chainhabits || true
+          xcrun simctl launch "$udid" com.mattbusel.chainhabits -shot year
+          sleep 7
+          xcrun simctl io "$udid" screenshot "shots/02.png"
+          xcrun simctl terminate "$udid" com.mattbusel.chainhabits || true
+          xcrun simctl launch "$udid" com.mattbusel.chainhabits -shot stats
+          sleep 7
+          xcrun simctl io "$udid" screenshot "shots/03.png"
+          xcrun simctl terminate "$udid" com.mattbusel.chainhabits || true
+          xcrun simctl launch "$udid" com.mattbusel.chainhabits -shot edit
+          sleep 7
+          xcrun simctl io "$udid" screenshot "shots/04.png"
+          xcrun simctl terminate "$udid" com.mattbusel.chainhabits || true
+          xcrun simctl launch "$udid" com.mattbusel.chainhabits -shot done
+          sleep 7
+          xcrun simctl io "$udid" screenshot "shots/05.png"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shots
+          path: shots

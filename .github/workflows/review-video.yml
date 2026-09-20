@@ -1,0 +1,79 @@
+name: Review video
+
+# Records the App Review screen recording on a rented Mac: starts on the home
+# screen, launches the app with -demoAutoplay, and stops when the app writes
+# Documents/demo_done.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  record:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 26
+        run: |
+          chosen=""
+          for app in $(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -Vr); do
+            if [ -d "$app/Contents/Developer" ]; then chosen="$app"; break; fi
+          done
+          if [ -z "$chosen" ]; then echo "no usable Xcode 26"; ls /Applications | grep -i xcode; exit 1; fi
+          sudo xcode-select -s "$chosen/Contents/Developer"
+          xcodebuild -version
+
+      - name: Generate the Xcode project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Record
+        timeout-minutes: 30
+        run: |
+          set -o pipefail
+          # A fresh device: bootstatus on the runner's default simulator hung
+          # for 15+ minutes on this account before.
+          rt=$(xcrun simctl list runtimes | grep -oE "com.apple.CoreSimulator.SimRuntime.iOS-[0-9-]+" | sort -V | tail -1)
+          udid=$(xcrun simctl create review "com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro-Max" "$rt")
+          xcrun simctl shutdown all || true
+          xcrun simctl boot "$udid" || true
+          for i in $(seq 1 60); do
+            xcrun simctl spawn "$udid" launchctl print system >/dev/null 2>&1 && break
+            sleep 5
+          done
+          xcrun simctl status_bar "$udid" override --time "9:41" --batteryState charged --batteryLevel 100 || true
+
+          xcodebuild build -project Chain.xcodeproj -scheme Chain -configuration Debug \
+            -destination "id=$udid" -derivedDataPath dd CODE_SIGNING_ALLOWED=NO | xcpretty
+          app=$(find dd/Build/Products -name "Chain.app" -path "*iphonesimulator*" | head -1)
+          xcrun simctl install "$udid" "$app"
+          sleep 20
+
+          mkdir -p capture
+          xcrun simctl io "$udid" recordVideo --codec h264 --force capture/review.mp4 &
+          rec=$!
+          sleep 4
+
+          xcrun simctl launch "$udid" com.mattbusel.chainhabits -demoAutoplay
+          data=$(xcrun simctl get_app_container "$udid" com.mattbusel.chainhabits data)
+          status=1
+          for i in $(seq 1 600); do
+            if [ -f "$data/Documents/demo_done" ]; then status=0; break; fi
+            sleep 0.5
+          done
+          [ $status = 0 ] && echo "demo finished" || echo "TIMED OUT: demo never finished"
+          sleep 1
+          kill -INT $rec 2>/dev/null || true
+          wait $rec 2>/dev/null || true
+          ls -la capture/
+          exit $status
+
+      - name: Upload the video
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: video
+          path: capture/*.mp4
+          if-no-files-found: warn
