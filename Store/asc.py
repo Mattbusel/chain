@@ -187,8 +187,17 @@ def create_app():
     return None
 
 
-def ensure_version(app_id: str, version="1.0"):
-    """Find or create the 1.0 version, which the listing text hangs off."""
+def current_version() -> str:
+    """MARKETING_VERSION from project.yml: the version being worked on."""
+    import re
+    text = (Path(__file__).resolve().parent.parent / "project.yml").read_text(encoding="utf-8")
+    m = re.search(r'MARKETING_VERSION:\s*"?([0-9.]+)', text)
+    return m.group(1) if m else "1.0"
+
+
+def ensure_version(app_id: str, version=None):
+    """Find or create the version being worked on, which the listing text hangs off."""
+    version = version or current_version()
     versions = call(
         "GET",
         f"/v1/apps/{app_id}/appStoreVersions",

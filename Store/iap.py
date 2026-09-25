@@ -5,6 +5,11 @@
     python Store/iap.py free                set the app itself to free
     python Store/iap.py status              show the purchase's state
     python Store/iap.py submit              submit version + purchase for review together
+
+Apple's API refuses the FIRST non-consumable of an app (STATE_ERROR.FIRST_NON_CONSUMABLE_MUST_BE_SUBMITTED_ON_VERSION),
+even with the version already in an open review submission. For that one, attach it by hand on the version page
+(In-App Purchases and Subscriptions, Select, tick it, Done), then Add for Review and Submit. Later purchases
+can go through `submit`.
 """
 import hashlib
 import sys

@@ -166,7 +166,8 @@ platform :ios do
       # Store Connect and nothing is submitted, so the listing can be looked at
       # before it goes to Apple.
       submit_for_review: false,
-      force: true
+      force: true,
+      precheck_include_in_app_purchases: false
     )
   end
 end
