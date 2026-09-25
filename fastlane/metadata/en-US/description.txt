@@ -1,5 +1,7 @@
 Chain is a habit tracker that takes five seconds a day and makes the pattern impossible to ignore.
 
+Free to start, unlimited with a one-time unlock. No subscription.
+
 Tick the habit, watch the ring fill, and keep the chain. Every habit gets a year of squares stitched like a quilt: lime where you did it, a hole where you did not.
 
 TODAY
@@ -9,7 +11,7 @@ TODAY
 HABITS THAT FIT REAL LIFE
 • Every day, certain weekdays, or a number of times a week
 • Weekly habits count in weeks, not days, so a Tuesday off does not break a three-a-week chain
-• Twenty icons, start dates, an optional daily reminder
+• Twenty icons, start dates, and a daily reminder at the hour you pick
 
 WEEK
 • A grid of the week to log or undo any day, faded where a habit is not due
@@ -19,5 +21,10 @@ YEAR
 
 STATS
 • Check-ins all time, 30-day completion, longest chain, perfect days, and which weekdays you actually do the work
+
+FREE AND UNLIMITED
+• Free: three habits and the last 30 days of the quilt, with every other feature
+• Chain Unlimited, one payment: unlimited habits, the whole year in the quilt, and reminders
+• Bought Chain before it went free? Everything is already unlocked for you
 
 No account, no ads, no tracking. Everything stays on your phone.

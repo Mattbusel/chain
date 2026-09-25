@@ -5,14 +5,17 @@ import UserNotifications
 struct ChainApp: App {
     @State private var store: Store
     @State private var router = Router()
+    @State private var purchases: Purchases
     init() {
         let a = ProcessInfo.processInfo.arguments
-        _store = State(initialValue: Store(demo: a.contains("-shot") || a.contains("-demoAutoplay")))
+        let demo = a.contains("-shot") || a.contains("-demoAutoplay")
+        _store = State(initialValue: Store(demo: demo))
+        _purchases = State(initialValue: Purchases(demo: demo))
     }
     var body: some Scene {
         WindowGroup {
-            RootView().environment(store).environment(router).preferredColorScheme(.dark).tint(Ink.lime)
-                .onAppear { router.applyShotArgs(store); Autopilot.shared.run(store, router) }
+            RootView().environment(store).environment(router).environment(purchases).preferredColorScheme(.dark).tint(Ink.lime)
+                .onAppear { purchases.start(); router.applyShotArgs(store); Autopilot.shared.run(store, router) }
         }
     }
 }
@@ -34,6 +37,12 @@ final class Router {
     var tab: Tab = .today
     var editing: Habit? = nil
     var creating = false
+    var paywall: Locked? = nil
+    var settings = false
+    /// The one door for a new habit: free keeps three.
+    func newHabit(_ s: Store, _ p: Purchases) {
+        if s.habits.count >= Purchases.freeHabits && !p.unlocked { paywall = .habits } else { creating = true }
+    }
     func applyShotArgs(_ s: Store) {
         let a = ProcessInfo.processInfo.arguments
         guard let i = a.firstIndex(of: "-shot"), i + 1 < a.count else { return }
@@ -42,6 +51,7 @@ final class Router {
         case "year": tab = .year
         case "stats": tab = .stats
         case "edit": editing = s.habits.first
+        case "paywall": paywall = .habits
         case "done": for h in s.habits where s.due(h, Day.today) && !s.done(h, Day.today) { s.log[Day.today, default: []].append(h.id) }
         default: break
         }
@@ -67,6 +77,8 @@ struct RootView: View {
         }
         .sheet(item: $router.editing) { h in HabitEditor(habit: h, isNew: false).presentationBackground(Ink.bg2).presentationDetents([.large]) }
         .sheet(isPresented: $router.creating) { HabitEditor(habit: Habit(name: "", start: Day.today), isNew: true).presentationBackground(Ink.bg2).presentationDetents([.large]) }
+        .sheet(item: $router.paywall) { r in Paywall(reason: r).presentationBackground(Ink.bg).presentationDetents([.large]) }
+        .sheet(isPresented: $router.settings) { SettingsSheet().presentationBackground(Ink.bg2).presentationDetents([.medium, .large]) }
     }
 }
 

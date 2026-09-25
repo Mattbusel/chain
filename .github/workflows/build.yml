@@ -66,6 +66,10 @@ jobs:
           xcrun simctl launch "$udid" com.mattbusel.chainhabits -shot done
           sleep 7
           xcrun simctl io "$udid" screenshot "shots/05.png"
+          xcrun simctl terminate "$udid" com.mattbusel.chainhabits || true
+          xcrun simctl launch "$udid" com.mattbusel.chainhabits -shot paywall
+          sleep 9
+          xcrun simctl io "$udid" screenshot "shots/06.png"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

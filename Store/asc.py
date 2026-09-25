@@ -55,7 +55,7 @@ def token() -> str:
     now = int(time.time())
     payload = {
         "iss": ISSUER_ID,
-        "iat": now,
+        "iat": now - 60,
         "exp": now + 20 * 60,
         "aud": "appstoreconnect-v1",
     }
@@ -70,9 +70,15 @@ def call(method: str, path: str, body=None, params=None, quiet=False):
         "Authorization": f"Bearer {token()}",
         "Content-Type": "application/json",
     }
-    response = requests.request(
-        method, url, headers=headers, json=body, params=params, timeout=60
-    )
+    for attempt in range(4):
+        response = requests.request(
+            method, url, headers=headers, json=body, params=params, timeout=60
+        )
+        if response.status_code != 401:
+            break
+        # Sporadic 401s from Apple on valid tokens; a fresh token a moment later works.
+        time.sleep(2 + attempt * 2)
+        headers["Authorization"] = f"Bearer {token()}"
     if response.status_code >= 400:
         if not quiet:
             print(f"  ! {method} {path} -> {response.status_code}")

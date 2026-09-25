@@ -5,6 +5,7 @@ import SwiftUI
 struct TodayView: View {
     @Environment(Store.self) private var store
     @Environment(Router.self) private var router
+    @Environment(Purchases.self) private var purchases
     var body: some View {
         let t = Day.today
         let due = store.habits.filter { store.due($0, t) }
@@ -18,7 +19,13 @@ struct TodayView: View {
                     Text(Date.now.formatted(.dateTime.weekday(.wide).month(.wide).day()) + (frac == 1 && !due.isEmpty ? " · Clean sweep." : n == 0 ? " · Start with the easiest one." : " · Keep the chain.")).font(.ui(13, .medium)).foregroundStyle(Ink.grey)
                 }
                 Spacer()
-                Ring(fraction: frac)
+                VStack(alignment: .trailing, spacing: 8) {
+                    Button { router.settings = true } label: {
+                        Image(systemName: "gearshape.fill").font(.system(size: 14, weight: .bold)).foregroundStyle(Ink.dim)
+                            .frame(width: 32, height: 32).background(Circle().fill(Ink.card))
+                    }.buttonStyle(.plain).accessibilityLabel("Settings")
+                    Ring(fraction: frac)
+                }
             }
             .padding(.top, 14)
             ForEach(due) { h in HabitRow(habit: h) }
@@ -28,7 +35,20 @@ struct TodayView: View {
                     Text(store.habits.isEmpty ? "Add a habit. Start with something you can do in two minutes." : "Enjoy it.").font(.ui(13, .medium)).foregroundStyle(Ink.grey)
                 }.frame(maxWidth: .infinity).tile(padding: 24)
             }
-            LimeButton(title: "New habit", icon: "plus") { router.creating = true }
+            LimeButton(title: "New habit", icon: "plus") { router.newHabit(store, purchases) }
+            if !purchases.unlocked {
+                Button { router.paywall = .habits } label: {
+                    HStack(spacing: 6) {
+                        ForEach(0..<Purchases.freeHabits, id: \.self) { i in
+                            RoundedRectangle(cornerRadius: 3).fill(i < store.habits.count ? Ink.lime : Ink.hole).frame(width: 12, height: 12)
+                        }
+                        Text("\(min(store.habits.count, Purchases.freeHabits)) of \(Purchases.freeHabits) free habits").font(.ui(12, .heavy)).foregroundStyle(Ink.grey)
+                        Spacer()
+                        Text("Unlimited").font(.ui(12, .heavy)).foregroundStyle(Ink.lime)
+                        Image(systemName: "chevron.right").font(.system(size: 10, weight: .black)).foregroundStyle(Ink.lime)
+                    }.padding(.horizontal, 4)
+                }.buttonStyle(.plain)
+            }
         }
     }
     var greeting: String { let h = Calendar.current.component(.hour, from: .now); return h < 12 ? "Morning." : h < 18 ? "Afternoon." : "Evening." }
@@ -88,6 +108,8 @@ struct HabitRow: View {
 
 struct WeekView: View {
     @Environment(Store.self) private var store
+    @Environment(Router.self) private var router
+    @Environment(Purchases.self) private var purchases
     var body: some View {
         @Bindable var store = store
         let ws = Day.add(Day.weekStart(Day.today), 7 * store.weekOffset)
@@ -96,7 +118,10 @@ struct WeekView: View {
             HStack(alignment: .lastTextBaseline) {
                 Text("Week.").font(.big(30)).foregroundStyle(Ink.white)
                 Spacer()
-                Button { store.weekOffset -= 1 } label: { Image(systemName: "chevron.left").font(.system(size: 14, weight: .black)).foregroundStyle(Ink.grey).frame(width: 34, height: 34).background(Circle().fill(Ink.card)) }.buttonStyle(.plain)
+                Button {
+                    // Free keeps the last 30 days: this week and the four before it.
+                    if !purchases.unlocked && store.weekOffset <= -4 { router.paywall = .history } else { store.weekOffset -= 1 }
+                } label: { Image(systemName: "chevron.left").font(.system(size: 14, weight: .black)).foregroundStyle(Ink.grey).frame(width: 34, height: 34).background(Circle().fill(Ink.card)) }.buttonStyle(.plain)
                 Text(Day.date(ws).formatted(.dateTime.month(.abbreviated).day()) + " – " + Day.date(days[6]).formatted(.dateTime.month(.abbreviated).day())).font(.ui(13, .heavy)).foregroundStyle(Ink.grey)
                 Button { if store.weekOffset < 0 { store.weekOffset += 1 } } label: { Image(systemName: "chevron.right").font(.system(size: 14, weight: .black)).foregroundStyle(store.weekOffset < 0 ? Ink.grey : Ink.dim).frame(width: 34, height: 34).background(Circle().fill(Ink.card)) }.buttonStyle(.plain)
             }.padding(.top, 14)
@@ -133,12 +158,28 @@ struct WeekView: View {
 
 struct YearView: View {
     @Environment(Store.self) private var store
+    @Environment(Router.self) private var router
+    @Environment(Purchases.self) private var purchases
     var body: some View {
         Page {
             VStack(alignment: .leading, spacing: 4) {
                 Text("The year.").font(.big(30)).foregroundStyle(Ink.white)
                 Text("Every day, every habit. The colour is the chain; a hole is a hole.").font(.ui(13, .medium)).foregroundStyle(Ink.grey)
             }.padding(.top, 14)
+            if !purchases.unlocked && !store.habits.isEmpty {
+                Button { router.paywall = .history } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "lock.fill").font(.system(size: 14, weight: .black)).foregroundStyle(Ink.bg)
+                            .frame(width: 34, height: 34).background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Ink.lime))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Free shows the last 30 days").font(.ui(14, .heavy)).foregroundStyle(Ink.white)
+                            Text("Unlock the whole quilt, back to day one.").font(.ui(12, .medium)).foregroundStyle(Ink.grey)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right").font(.system(size: 12, weight: .black)).foregroundStyle(Ink.lime)
+                    }.tile(padding: 12)
+                }.buttonStyle(.plain)
+            }
             ForEach(store.habits) { h in
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
@@ -146,7 +187,7 @@ struct YearView: View {
                         Spacer()
                         Text("\(store.total(h)) done · best \(store.best(h)) · \(Int((store.rate(h, days: 365) * 100).rounded()))%").font(.num(11, .bold)).foregroundStyle(Ink.dim)
                     }
-                    Quilt(habit: h)
+                    Quilt(habit: h, locked: !purchases.unlocked)
                 }.tile()
             }
             if store.habits.isEmpty { Text("Add a habit and this fills in day by day.").font(.ui(14, .medium)).foregroundStyle(Ink.grey).tile() }
@@ -158,6 +199,7 @@ struct YearView: View {
 struct Quilt: View {
     @Environment(Store.self) private var store
     let habit: Habit
+    var locked = false
     var body: some View {
         let end = Day.today
         let start = Day.add(Day.weekStart(end), -25 * 7)
@@ -171,9 +213,10 @@ struct Quilt: View {
                 let r = Day.dow(d)
                 let x = 22 + Double(col) * cell, y = Double(r) * cell
                 let rect = CGRect(x: x, y: y, width: s, height: s)
-                let colour: Color = d < habit.start ? Ink.line.opacity(0.4) : store.done(habit, d) ? Ink.lime : store.due(habit, d) ? Ink.hole : Ink.line
+                let hidden = locked && Day.diff(d, end) >= Purchases.freeHistoryDays
+                let colour: Color = hidden ? Ink.line.opacity(0.5) : d < habit.start ? Ink.line.opacity(0.4) : store.done(habit, d) ? Ink.lime : store.due(habit, d) ? Ink.hole : Ink.line
                 ctx.fill(Path(roundedRect: rect, cornerRadius: 3), with: .color(colour))
-                if store.done(habit, d) {
+                if !hidden && store.done(habit, d) {
                     // Stitches: a little cross on done days, the quilt look.
                     var p = Path()
                     p.move(to: CGPoint(x: rect.minX + 2, y: rect.minY + 2)); p.addLine(to: CGPoint(x: rect.maxX - 2, y: rect.maxY - 2))
@@ -245,8 +288,10 @@ struct StatsView: View {
 
 struct HabitEditor: View {
     @Environment(Store.self) private var store
+    @Environment(Purchases.self) private var purchases
     @Environment(\.dismiss) private var dismiss
     @State var habit: Habit
+    @State private var paywall: Locked? = nil
     let isNew: Bool
     static let emojis = ["📖", "🏃", "💧", "🧘", "💪", "🥗", "😴", "✍️", "🎸", "🧹", "💊", "🚭", "🌱", "🧠", "📵", "🦷", "🚶", "🎯", "🧺", "☀️"]
     var body: some View {
@@ -281,7 +326,10 @@ struct HabitEditor: View {
                 }
                 VStack(alignment: .leading, spacing: 8) {
                     Eyebrow("Reminder")
-                    Toggle(isOn: $habit.remind) { Text("Remind me every day").font(.ui(14, .semibold)).foregroundStyle(Ink.white) }.tint(Ink.lime)
+                    Toggle(isOn: Binding(get: { habit.remind }, set: { on in
+                        // Reminders come with Unlimited; one already set keeps working either way.
+                        if on && !purchases.unlocked { paywall = .reminders } else { habit.remind = on }
+                    })) { Text("Remind me every day").font(.ui(14, .semibold)).foregroundStyle(Ink.white) }.tint(Ink.lime)
                     if habit.remind {
                         Picker("At", selection: $habit.remindHour) { ForEach([7, 8, 9, 12, 17, 18, 19, 20, 21, 22], id: \.self) { h in Text(String(format: "%02d:00", h)).tag(h) } }.pickerStyle(.segmented)
                     }
@@ -298,5 +346,6 @@ struct HabitEditor: View {
                 }
             }.padding(18)
         }
+        .sheet(item: $paywall) { r in Paywall(reason: r).presentationBackground(Ink.bg).presentationDetents([.large]) }
     }
 }
