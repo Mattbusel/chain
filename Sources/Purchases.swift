@@ -7,14 +7,14 @@ import SwiftUI
 @MainActor
 @Observable
 final class Purchases {
-    static let productID = "com.mattbusel.chainhabits.unlimited"
-    static let freeHabits = 3
-    static let freeHistoryDays = 30
+    nonisolated static let productID = "com.mattbusel.chainhabits.unlimited"
+    nonisolated static let freeHabits = 3
+    nonisolated static let freeHistoryDays = 30
     /// Build 1 was the only paid-era build. Anything a person first downloaded before the
     /// cutoff (the day the price went to free, plus a day for the price change to reach
     /// every storefront) came from the paid app.
-    static let firstFreeBuild = 2
-    static let paidCutoff = ISO8601DateFormatter().date(from: "2026-09-26T17:00:00Z")!
+    nonisolated static let firstFreeBuild = 2
+    nonisolated static let paidCutoff = ISO8601DateFormatter().date(from: "2026-09-26T17:00:00Z")!
 
     private(set) var purchased: Bool
     private(set) var grandfathered: Bool

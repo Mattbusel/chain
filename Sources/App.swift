@@ -40,7 +40,7 @@ final class Router {
     var paywall: Locked? = nil
     var settings = false
     /// The one door for a new habit: free keeps three.
-    func newHabit(_ s: Store, _ p: Purchases) {
+    @MainActor func newHabit(_ s: Store, _ p: Purchases) {
         if s.habits.count >= Purchases.freeHabits && !p.unlocked { paywall = .habits } else { creating = true }
     }
     func applyShotArgs(_ s: Store) {
