@@ -7,7 +7,7 @@ options:
   createIntermediateGroups: true
 settings:
   base:
-    MARKETING_VERSION: "1.1"
+    MARKETING_VERSION: "1.2"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
     CODE_SIGN_STYLE: Manual
@@ -18,20 +18,33 @@ targets:
   Chain:
     type: application
     platform: iOS
+    dependencies:
+      - target: ChainWidgets
     sources:
       - path: Sources
       - path: Resources/PrivacyInfo.xcprivacy
         buildPhase: resources
       - path: Resources/Assets.xcassets
         buildPhase: resources
+    entitlements:
+      path: Resources/Chain.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.mattbusel.chainhabits
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
+        com.apple.developer.ubiquity-kvstore-identifier: $(TeamIdentifierPrefix)$(CFBundleIdentifier)
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mattbusel.chainhabits
         PRODUCT_NAME: Chain
         INFOPLIST_KEY_CFBundleDisplayName: Chain
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: "AppIcon-Ember AppIcon-Tide AppIcon-Bloom AppIcon-Gold AppIcon-Violet"
+        ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: YES
         TARGETED_DEVICE_FAMILY: "1"
         SUPPORTS_MACCATALYST: NO
+        PROVISIONING_PROFILE_SPECIFIER: "${APP_PROFILE}"
     info:
       path: Resources/Info.plist
       properties:
@@ -45,6 +58,36 @@ targets:
         UIUserInterfaceStyle: Dark
         UIStatusBarStyle: UIStatusBarStyleLightContent
         ITSAppUsesNonExemptEncryption: false
+        NSHealthShareUsageDescription: "Chain reads today's steps, exercise minutes, mindful minutes and workouts to tick off the habits you link to Apple Health. Nothing is written to Health and nothing leaves your iPhone."
+        NSHealthUpdateUsageDescription: "Chain never writes to Apple Health. It only reads today's totals for habits you link."
+  ChainWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Widgets
+      - path: Sources/Shared
+      - path: Resources/PrivacyInfo.xcprivacy
+        buildPhase: resources
+    entitlements:
+      path: Widgets/ChainWidgets.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.mattbusel.chainhabits
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mattbusel.chainhabits.widgets
+        PRODUCT_NAME: ChainWidgets
+        PROVISIONING_PROFILE_SPECIFIER: "${EXT_PROFILE}"
+        TARGETED_DEVICE_FAMILY: "1"
+        SKIP_INSTALL: YES
+    info:
+      path: Widgets/Info.plist
+      properties:
+        CFBundleDisplayName: Chain
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
 schemes:
   Chain:
     build:

@@ -1,30 +1,38 @@
-Chain is a habit tracker that takes five seconds a day and makes the pattern impossible to ignore.
+Chain is the habit tracker that takes five seconds a day and makes your progress impossible to ignore. Tick a habit off, watch the ring fill, and keep the chain going. Every habit gets a year of squares stitched like a quilt: colour where you did it, a hole where you didn't.
 
-Free to start, unlimited with a one-time unlock. No subscription.
+Free to start. One unlock for everything. No subscription, ever.
 
-Tick the habit, watch the ring fill, and keep the chain. Every habit gets a year of squares stitched like a quilt: lime where you did it, a hole where you did not.
-
-TODAY
-• Big tactile tiles, one tap to log, a completion ring for the day
-• A fourteen-day strip under each habit and the current streak beside it
+TICK IT OFF FROM ANYWHERE
+• Home Screen widgets you can tap: tick a habit off without opening the app
+• A Lock Screen ring with today's count
+• "Log Read in Chain" with Siri, or the Log a habit shortcut
+• A reminder with a Done button that stays quiet on days you've already done it
 
 HABITS THAT FIT REAL LIFE
 • Every day, certain weekdays, or a number of times a week
-• Weekly habits count in weeks, not days, so a Tuesday off does not break a three-a-week chain
-• Twenty icons, start dates, and a daily reminder at the hour you pick
+• Amounts and targets: 8 glasses, 20 pages, 10,000 steps, filled in tap by tap
+• Apple Health ticks off steps, exercise, mindful minutes and workouts for you
+• Quit habits: count the days clean, log a slip, keep your best on record
+• Morning, afternoon and evening groups, so the day reads top to bottom
 
-WEEK
-• A grid of the week to log or undo any day, faded where a habit is not due
+MISSED A DAY? THE CHAIN CAN SURVIVE IT
+• Freezes skip a sick day without breaking the chain
+• Pause a habit for a holiday and pick it straight back up
+• Streak Repair patches a missed day in gold when the freezes run out
 
-YEAR
-• Twenty-six weeks of squares per habit, with totals, best chain and the completion rate
+SEE YOUR YEAR
+• Week grid to log or fix any day
+• The year quilt for every habit, with totals, best chain and completion
+• Stats on your best and worst weekdays, perfect days and longest chains
+• Notes on any day, and a shareable image of your chain
 
-STATS
-• Check-ins all time, 30-day completion, longest chain, perfect days, and which weekdays you actually do the work
+MAKE IT YOURS
+• Five colour themes, each with a matching app icon, 99 cents each
+• Celebrations for every clean sweep
 
 FREE AND UNLIMITED
-• Free: three habits and the last 30 days of the quilt, with every other feature
-• Chain Unlimited, one payment: unlimited habits, the whole year in the quilt, and reminders
+• Free: three habits, the Next Up widget and Lock Screen ring, a daily check-in reminder, the last 90 days of the quilt, one freeze a month, quit counters, notes and Siri
+• Chain Unlimited, one payment: unlimited habits, every widget, a reminder per habit, amounts and Apple Health, three freezes a month and pauses, the whole quilt, iCloud backup and CSV export
 • Bought Chain before it went free? Everything is already unlocked for you
 
-No account, no ads, no tracking. Everything stays on your phone.
+No account, no ads, no tracking. Your habits stay on your iPhone, and in your own iCloud if you turn backup on.

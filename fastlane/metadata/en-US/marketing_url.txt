@@ -1,1 +1,1 @@
-https://mattbusel.github.io/app-pages/chain/
+https://app-pages-one.vercel.app/chain/

@@ -1,1 +1,1 @@
-habit,habits,streak,tracker,routine,daily,goals,productivity,discipline,heatmap,chain
+goals,quit,sober,counter,checklist,planner,productivity,discipline,reminder,water,reading,meditate

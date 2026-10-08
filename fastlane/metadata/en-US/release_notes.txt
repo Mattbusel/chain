@@ -1,7 +1,14 @@
-Chain is now free to start: three habits and the last 30 days of the quilt cost nothing.
+The biggest Chain update yet.
 
-Chain Unlimited is a one-time unlock for unlimited habits, the whole year in the quilt, and reminders. No subscription.
+• Widgets: tick habits off right from your Home Screen, plus a Lock Screen ring
+• Amounts and targets: 8 glasses, 20 pages, filled in tap by tap
+• Apple Health can tick off steps, exercise, mindful minutes and workouts
+• Quit habits: count the days clean
+• Freezes, pauses and Streak Repair, so one missed day doesn't cost the whole chain
+• Reminders with a Done button, and a free daily check-in
+• Notes, a habit detail page and a shareable chain image
+• Siri: "Log Read in Chain"
+• Five colour themes with matching app icons, and celebration effects
+• Free now shows 90 days of the quilt, up from 30
 
-If you bought Chain before it went free, everything is already unlocked. Thank you.
-
-New Settings screen with Restore purchase.
+Everything you've logged carries over.

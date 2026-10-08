@@ -42,34 +42,14 @@ jobs:
           app=$(find dd/Build/Products -name "Chain.app" -path "*iphonesimulator*" | head -1)
           xcrun simctl install "$udid" "$app"
           mkdir -p shots
-          xcrun simctl terminate "$udid" com.mattbusel.chainhabits || true
-          xcrun simctl launch "$udid" com.mattbusel.chainhabits -shot today
-          sleep 7
-          xcrun simctl io "$udid" screenshot "shots/00.png"
-          xcrun simctl terminate "$udid" com.mattbusel.chainhabits || true
-          xcrun simctl launch "$udid" com.mattbusel.chainhabits -shot week
-          sleep 7
-          xcrun simctl io "$udid" screenshot "shots/01.png"
-          xcrun simctl terminate "$udid" com.mattbusel.chainhabits || true
-          xcrun simctl launch "$udid" com.mattbusel.chainhabits -shot year
-          sleep 7
-          xcrun simctl io "$udid" screenshot "shots/02.png"
-          xcrun simctl terminate "$udid" com.mattbusel.chainhabits || true
-          xcrun simctl launch "$udid" com.mattbusel.chainhabits -shot stats
-          sleep 7
-          xcrun simctl io "$udid" screenshot "shots/03.png"
-          xcrun simctl terminate "$udid" com.mattbusel.chainhabits || true
-          xcrun simctl launch "$udid" com.mattbusel.chainhabits -shot edit
-          sleep 7
-          xcrun simctl io "$udid" screenshot "shots/04.png"
-          xcrun simctl terminate "$udid" com.mattbusel.chainhabits || true
-          xcrun simctl launch "$udid" com.mattbusel.chainhabits -shot done
-          sleep 7
-          xcrun simctl io "$udid" screenshot "shots/05.png"
-          xcrun simctl terminate "$udid" com.mattbusel.chainhabits || true
-          xcrun simctl launch "$udid" com.mattbusel.chainhabits -shot paywall
-          sleep 9
-          xcrun simctl io "$udid" screenshot "shots/06.png"
+          i=0
+          for shot in today widgets year detail rescue themes week stats edit paywall onboarding done; do
+            xcrun simctl terminate "$udid" com.mattbusel.chainhabits || true
+            xcrun simctl launch "$udid" com.mattbusel.chainhabits -shot $shot
+            sleep 8
+            xcrun simctl io "$udid" screenshot "shots/$(printf %02d $i)-$shot.png"
+            i=$((i+1))
+          done
       - uses: actions/upload-artifact@v4
         if: always()
         with:

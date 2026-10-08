@@ -4,22 +4,33 @@
 
 No account, login or network connection is required.
 
-WHAT IS NEW IN 1.1: Chain is now free to download, with one non-consumable in-app purchase, "Chain Unlimited" (com.mattbusel.chainhabits.unlimited). The free app keeps three habits and shows the last 30 days of each habit's year quilt; every other feature is free. Chain Unlimited unlocks unlimited habits, the full year quilt and reminders. It is a one-time purchase, not a subscription.
+WHAT IS NEW IN 1.2: Home Screen and Lock Screen widgets (WidgetKit extension; rows are interactive buttons), amount habits, quit habits, Apple Health auto-complete (read-only), freezes, pauses, per-habit reminders with a Done action, notes, Siri/Shortcuts (Log a habit), optional iCloud key-value backup, CSV export, colour themes with alternate app icons, and seven new in-app purchases.
 
-HOW TO SEE AND TEST THE PURCHASE (sandbox): on a fresh install, add three habits, then tap "New habit" a fourth time: the Chain Unlimited sheet opens with the price, "Unlock", and "Restore purchase". The same sheet opens from the "3 of 3 free habits" line on Today, from the lock banner on the Year tab, from the Reminder switch in the habit editor, and from the gear icon (Settings) on Today, which also has Restore purchase. After buying, the limits lift at once and the sheet says it is unlocked. People who paid for Chain before 1.1 are unlocked automatically (checked with AppTransaction in production only; sandbox always shows the paywall).
+IN-APP PURCHASES (StoreKit 2, all optional, Restore in Settings):
+- Chain Unlimited (existing non-consumable): add three habits, tap New habit again; also from the gear (Settings), the Year tab lock banner and the locked controls marked UNLIMITED in the editor.
+- Streak Repair, $0.99 consumable: when a chain of 2+ days breaks, Today shows a "chain broke" banner and the rescue sheet opens. It offers a free freeze if one is left this month, then Streak Repair, which patches the missed day. Also: Week tab, hold a missed square, Streak Repair. To see it on a fresh install: add a habit, open Week, tick the two days before yesterday, leave yesterday empty, then relaunch.
+- Ember, Tide, Bloom, Gold, Violet themes ($0.99 each, non-consumable) and Celebration Pack ($0.99, non-consumable): Settings > Themes, icons and celebrations. A bought theme recolours the app and widgets and switches the app icon (alternate icons). Lime is free.
 
-HOW TO USE: Tap "New habit" on the Today tab, name it, choose how often, save. Tap the habit's tile to log it for today; hold the row to edit. The Week tab logs any day; Year shows the heat map; Stats the numbers. The optional daily reminder asks for notification permission only when switched on in the editor.
+APPLE HEALTH: read-only. In the habit editor, turn on Amount (Unlimited), then "Fill it from Apple Health" and choose Steps, Exercise minutes, Mindful minutes or Workouts. Chain asks for read permission for that one type, reads today's total when the app opens, and ticks the habit off at the target. Nothing is written to Health, nothing leaves the device, no Health data is used for advertising.
 
-PRIVACY: no data is collected. Everything is stored in a JSON file in the app's Documents folder on the device. Local notifications only, and only if the user turns a reminder on.
+WIDGETS: Next Up (small, free), Today (medium/large, Unlimited), Lock Screen ring (free) and line (Unlimited). Data is shared with the widget through the app group group.com.mattbusel.chainhabits.
+
+ICLOUD: off by default. Settings > Back up to iCloud (Unlimited) stores one copy of the user's data in their own iCloud key-value store.
+
+REMINDERS: a free daily check-in (Settings, or the last onboarding page) and per-habit times (Unlimited). Permission is only asked when one is turned on.
+
+HOW TO USE: on first launch, pick up to three starter habits. Tap a habit's square to tick it (amount habits add a step per tap). Tap the habit's name for its detail page; hold the row for notes and edit. Week logs any day; Year shows the quilt; Stats the numbers.
+
+PRIVACY: no data is collected. No accounts, analytics, ads or third-party SDKs.
 
 2. PURPOSE AND TARGET AUDIENCE
-Chain is a personal habit tracker: log daily, weekday or N-per-week habits, see streaks and a year heat map per habit. Free with an optional one-time unlock. General audience; rated 4+.
+A personal habit tracker for a general audience, rated 4+. Free with optional one-time purchases; no subscriptions.
 
 3. SETUP AND ACCESS
-No setup, login or credentials. A new install starts empty; add one habit and tap it.
+No setup or credentials.
 
-4. EXTERNAL SERVICES, TOOLS AND PLATFORMS
-None. No network requests, analytics, advertising or third-party frameworks. Built with SwiftUI, Foundation, StoreKit 2 (the one in-app purchase) and UserNotifications (local reminders only).
+4. EXTERNAL SERVICES
+None besides Apple frameworks: SwiftUI, WidgetKit, AppIntents, StoreKit 2, HealthKit (read-only), UserNotifications (local), NSUbiquitousKeyValueStore (optional backup).
 
 5. REGIONAL DIFFERENCES
 None.

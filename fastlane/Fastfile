@@ -16,6 +16,7 @@
 default_platform(:ios)
 
 APP_IDENTIFIER = "com.mattbusel.chainhabits"
+EXT_IDENTIFIER = "com.mattbusel.chainhabits.widgets"
 SCHEME = "Chain"
 
 platform :ios do
@@ -84,7 +85,17 @@ platform :ios do
       force: true
     )
     profile_name = lane_context[SharedValues::SIGH_NAME]
-    UI.message("signing with profile: #{profile_name}")
+    # The widget extension is its own bundle id with its own App Store profile.
+    get_provisioning_profile(
+      api_key: api_key,
+      app_identifier: EXT_IDENTIFIER,
+      force: true
+    )
+    ext_profile = lane_context[SharedValues::SIGH_NAME]
+    UI.message("signing with profiles: #{profile_name} / #{ext_profile}")
+    # Two targets, two profiles: a PROVISIONING_PROFILE_SPECIFIER on the command line would
+    # apply to both, so project.yml reads each from the environment at generation time.
+    sh("cd .. && APP_PROFILE='#{profile_name}' EXT_PROFILE='#{ext_profile}' xcodegen generate")
 
     # One above whatever App Store Connect already has, so a rebuild of the same
     # version never collides.
@@ -104,14 +115,13 @@ platform :ios do
       export_method: "app-store",
       xcargs: [
         "CODE_SIGN_STYLE=Manual",
-        "PROVISIONING_PROFILE_SPECIFIER='#{profile_name}'",
         "CODE_SIGN_IDENTITY='Apple Distribution'",
         "CURRENT_PROJECT_VERSION=#{next_build}",
       ].join(" "),
       export_options: {
         signingStyle: "manual",
         teamID: ENV.fetch("DEVELOPMENT_TEAM"),
-        provisioningProfiles: { APP_IDENTIFIER => profile_name }
+        provisioningProfiles: { APP_IDENTIFIER => profile_name, EXT_IDENTIFIER => ext_profile }
       },
       output_directory: "build",
       output_name: "Chain.ipa"
