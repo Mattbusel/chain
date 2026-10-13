@@ -51,6 +51,8 @@ This app was written on a Windows PC. No Mac is involved at any point: every bui
 
 Only one step is manual: Apple's API will not create the app record itself, so that is made once in the App Store Connect web UI.
 
+Want this pipeline for your own app? It is packaged, with a free-with-Pro starter app and the App Store Connect scripts, as [Ship iOS Apps from Windows](https://mattitude8861.gumroad.com/l/ship-ios-from-windows-kit?utm_source=github&utm_medium=readme&utm_campaign=chain) ($39).
+
 ## Build and run
 
 With a Mac and Xcode 26 (the version CI uses; the app targets iOS 17+):
