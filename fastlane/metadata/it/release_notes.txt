@@ -1,0 +1,14 @@
+Chain 1.3 è l'aggiornamento più grande di sempre.
+
+• Sfide mensili: un'abitudine, un mese, e con quattro giorni su cinque vinci il badge. Quella di questo mese è aperta a tutti
+• Traguardi a 7, 30, 100 e 365 giorni, con un'immagine da condividere
+• Approfondimenti: questo mese contro il precedente, abitudini che si danno forza a vicenda, il tuo momento migliore della giornata e i tuoi prossimi traguardi
+• Log Next Habit in Centro di Controllo, sulla schermata di blocco e sul tasto Azione
+• Widget Best Chain per la schermata Home e StandBy, più un conteggio compatto sulla schermata di blocco
+• Siri: "How's my chain?"
+• Chain Plus, un nuovo piano mensile o annuale: tutto Unlimited più tre Streak Repair ogni mese, cinque congelamenti al mese, tutti i temi e l'intera libreria di sfide. Unlimited resta uno sblocco con pagamento unico
+• Freeze Pack: tre congelamenti che non scadono mai
+• Supporto per testo più grande, etichette VoiceOver e spunte più fluide
+• Corretto: registrare un giorno passato di un'abitudine a quantità ora riempie tutto l'obiettivo, ed eliminare un'abitudine rimuove tutta la sua cronologia
+
+Tutto quello che hai registrato resta dov'è.

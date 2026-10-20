@@ -74,6 +74,10 @@ def call(method: str, path: str, body=None, params=None, quiet=False):
         response = requests.request(
             method, url, headers=headers, json=body, params=params, timeout=60
         )
+        if response.status_code == 429 and attempt < 3:
+            # The hourly API budget is shared by every script on this key; wait it out.
+            time.sleep(60 * (attempt + 1))
+            continue
         if response.status_code != 401:
             break
         # Sporadic 401s from Apple on valid tokens; a fresh token a moment later works.

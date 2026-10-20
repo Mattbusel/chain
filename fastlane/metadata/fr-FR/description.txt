@@ -1,0 +1,47 @@
+Chain est le suivi des habitudes qui prend cinq secondes par jour et rend vos progrès impossibles à ignorer. Cochez une habitude, regardez l'anneau se remplir et ne brisez pas la chaîne. Chaque habitude a son année de cases cousues comme un patchwork : de la couleur quand c'est fait, un trou sinon.
+
+NOUVEAUTÉS DE LA 1.3
+• Un défi par mois : une habitude, un mois, quatre jours sur cinq pour le badge. Celui de ce mois est ouvert à tous
+• Des paliers fêtés à 7, 30, 100 et 365 jours, avec une image à partager
+• Analyses : ce mois face au précédent, les habitudes qui se renforcent, votre meilleur moment de la journée, la date du prochain palier de chaque chaîne
+• Log Next Habit dans le Centre de contrôle, sur l'écran verrouillé et le bouton Action
+• Un widget Best Chain superbe en mode En veille, et une ligne sous l'horloge de l'écran verrouillé
+• Demandez à Siri "How's my chain?"
+
+COCHEZ DE PARTOUT
+• Widgets interactifs sur l'écran d'accueil : cochez sans ouvrir l'app
+• Anneau, ligne et compteur compact sur l'écran verrouillé
+• "Log Read in Chain" avec Siri, ou le raccourci Log a habit
+• Un rappel avec bouton Fait, silencieux les jours où c'est déjà fait
+
+DES HABITUDES FAITES POUR LA VRAIE VIE
+• Chaque jour, certains jours de la semaine ou X fois par semaine
+• Quantités et objectifs : 8 verres, 20 pages, 10 000 pas, touche par touche
+• L'app Santé coche pour vous pas, exercice, minutes de pleine conscience et entraînements
+• Habitudes à arrêter : jours sans comptés, écarts notés, record gardé
+• Groupes matin, après-midi et soir, pour lire la journée de haut en bas
+
+UN JOUR MANQUÉ ? LA CHAÎNE PEUT TENIR
+• Les gels sautent un jour de maladie sans briser la chaîne
+• Mettez une habitude en pause en vacances et reprenez-la au retour
+• Streak Repair rapièce en or un jour manqué quand les gels sont épuisés
+
+VOTRE ANNÉE EN UN COUP D'ŒIL
+• Grille de la semaine pour noter ou corriger chaque jour
+• Le patchwork de l'année par habitude, avec totaux, meilleure chaîne et taux de réussite
+• Statistiques : meilleurs et pires jours de la semaine, jours parfaits, plus longues chaînes
+• Des notes sur chaque jour, et une image de votre chaîne à partager
+
+FORMULES
+• Gratuit : trois habitudes, le défi du mois (hors des trois), widgets Next Up et Best Chain, anneau de l'écran verrouillé, un rappel quotidien, les 90 derniers jours du patchwork, un gel par mois, compteurs d'arrêt, notes, Siri et Centre de contrôle
+• Chain Unlimited, un seul paiement, à vous pour de bon : habitudes illimitées, tous les widgets, un rappel par habitude, quantités et app Santé, trois gels par mois et pauses, patchwork complet, sauvegarde iCloud et export CSV
+• Chain Plus, mensuel ou annuel : tout Unlimited, plus trois Streak Repair au début de chaque mois, cinq gels par mois, tous les thèmes et célébrations, toute la bibliothèque de défis à tout moment, et les Analyses. L'annuel commence par un essai gratuit d'une semaine pour les nouveaux abonnés
+• Petits extras : Streak Repair et Freeze Pack, cinq thèmes de couleur avec icônes assorties, et le pack de célébrations
+• Chain acheté avant qu'il devienne gratuit ? Unlimited est déjà à vous
+
+Chain Plus est un abonnement à renouvellement automatique. Le paiement est débité sur votre identifiant Apple à la confirmation de l'achat (après l'essai gratuit, le cas échéant). Il se renouvelle automatiquement au même prix sauf annulation au moins 24 heures avant la fin de la période en cours, et votre compte est débité du renouvellement dans les 24 heures précédant cette échéance. Gérez-le ou annulez-le à tout moment dans les réglages du compte App Store. La partie inutilisée d'un essai gratuit prend fin à l'abonnement.
+
+Conditions d'utilisation (EULA) : https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Politique de confidentialité : https://tensorust.com/apps/chain/privacy/
+
+Pas de compte, pas de pub, pas de pistage. Vos habitudes restent sur votre iPhone, et dans votre iCloud si vous activez la sauvegarde.

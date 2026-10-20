@@ -1,0 +1,47 @@
+Chain è il tracker di abitudini che ti chiede cinque secondi al giorno e rende i tuoi progressi impossibili da ignorare. Spunta un'abitudine, guarda l'anello riempirsi e non spezzare la catena. Ogni abitudine ha un anno di quadratini cuciti come una trapunta: colore dove l'hai fatto, un buco dove no.
+
+NOVITÀ DELLA 1.3
+• Una sfida ogni mese: un'abitudine, un mese, quattro giorni su cinque per il badge. Quella di questo mese è aperta a tutti
+• Traguardi festeggiati a 7, 30, 100 e 365 giorni, con un'immagine da condividere
+• Approfondimenti: questo mese contro il precedente, abitudini che si aiutano a vicenda, il tuo orario migliore e quando ogni catena toccherà il prossimo traguardo
+• Log Next Habit in Centro di Controllo, sulla schermata di blocco e sul tasto Azione
+• Un widget Best Chain bellissimo in StandBy e una riga sotto l'orologio della schermata di blocco
+• Chiedi a Siri "How's my chain?"
+
+SPUNTA DA DOVUNQUE
+• Widget interattivi nella schermata Home: spunta senza aprire l'app
+• Anello, riga e conteggio compatto sulla schermata di blocco
+• "Log Read in Chain" con Siri, o l'abbreviazione Log a habit
+• Un promemoria con il tasto Fatto, silenzioso nei giorni in cui hai già finito
+
+ABITUDINI A MISURA DI VITA VERA
+• Ogni giorno, in certi giorni della settimana o X volte a settimana
+• Quantità e obiettivi: 8 bicchieri, 20 pagine, 10.000 passi, riempiti tocco dopo tocco
+• L'app Salute spunta per te passi, esercizio, minuti di consapevolezza e allenamenti
+• Abitudini da smettere: conta i giorni puliti, registra una ricaduta e tieni il record
+• Gruppi mattina, pomeriggio e sera: la giornata si legge dall'alto in basso
+
+HAI SALTATO UN GIORNO? LA CATENA REGGE
+• I freeze saltano un giorno di malattia senza spezzare la catena
+• Metti in pausa un'abitudine in vacanza e riprendila al ritorno
+• Streak Repair rattoppa in oro un giorno perso quando i freeze sono finiti
+
+IL TUO ANNO A COLPO D'OCCHIO
+• Griglia settimanale per registrare o correggere ogni giorno
+• La trapunta dell'anno per ogni abitudine, con totali, catena migliore e tasso di completamento
+• Statistiche: giorni della settimana migliori e peggiori, giorni perfetti, catene più lunghe
+• Note su ogni giorno e un'immagine della catena da condividere
+
+PIANI
+• Gratis: tre abitudini, la sfida del mese (fuori dalle tre), widget Next Up e Best Chain, anello della schermata di blocco, un promemoria giornaliero, gli ultimi 90 giorni della trapunta, un freeze al mese, contatori per smettere, note, Siri e Centro di Controllo
+• Chain Unlimited, un solo pagamento, tuo per sempre: abitudini illimitate, tutti i widget, un promemoria per abitudine, quantità e app Salute, tre freeze al mese e pause, la trapunta completa, backup iCloud ed export CSV
+• Chain Plus, mensile o annuale: tutto Unlimited, più tre Streak Repair all'inizio di ogni mese, cinque freeze al mese, tutti i temi e celebrazioni, l'intera libreria di sfide quando vuoi e gli Approfondimenti. L'annuale inizia con 1 settimana di prova gratuita per i nuovi abbonati
+• Piccoli extra: Streak Repair e Freeze Pack, cinque temi colore con icone abbinate e il pacchetto celebrazioni
+• Hai comprato Chain prima che diventasse gratis? Unlimited è già tuo
+
+Chain Plus è un abbonamento con rinnovo automatico. Il pagamento è addebitato sul tuo ID Apple alla conferma dell'acquisto (al termine della prova gratuita, se ne avvii una). Si rinnova automaticamente allo stesso prezzo, salvo disdetta almeno 24 ore prima della fine del periodo in corso, e il rinnovo è addebitato sull'account nelle 24 ore prima della fine del periodo. Gestiscilo o disdicilo quando vuoi nelle impostazioni dell'account App Store. La parte non usata di una prova gratuita termina quando ti abboni.
+
+Termini d'uso (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Informativa sulla privacy: https://tensorust.com/apps/chain/privacy/
+
+Niente account, pubblicità né tracciamento. Le tue abitudini restano sul tuo iPhone, e nel tuo iCloud se attivi il backup.

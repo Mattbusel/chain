@@ -1,3 +1,4 @@
+import StoreKit
 import SwiftUI
 import UIKit
 import WidgetKit
@@ -155,7 +156,7 @@ struct RescueSheet: View {
     let rescue: Rescue
     @State private var saved = false
     var body: some View {
-        let left = store.freezesLeft(pro: purchases.unlocked)
+        let left = store.freezesLeft(purchases.freezeAllowance)
         let weekday = Day.date(rescue.day).formatted(.dateTime.weekday(.wide))
         ZStack(alignment: .topTrailing) {
             CharcoalBackground()
@@ -172,8 +173,15 @@ struct RescueSheet: View {
                         LimeButton(title: "Keep going") { dismiss() }
                     } else {
                         if left > 0 {
-                            option(icon: "snowflake", tint: Ink.ice, title: "Use a freeze", detail: "\(left) left this month. The day is skipped and the chain holds.", price: "Free") {
-                                store.freeze(rescue.habit, rescue.day); win()
+                            option(icon: "snowflake", tint: Ink.ice, title: "Use a freeze", detail: "\(left) left. The day is skipped and the chain holds.", price: "Use") {
+                                store.freeze(rescue.habit, rescue.day, allowance: purchases.freezeAllowance); win()
+                            }
+                        } else {
+                            option(icon: "snowflake", tint: Ink.ice, title: "Freeze Pack", detail: "\(Purchases.packFreezes) freezes that never expire. One covers this day, the rest wait for the next.", price: purchases.price(Purchases.freezesID)) {
+                                Task {
+                                    guard await purchases.buy(Purchases.freezesID) else { return }
+                                    store.freeze(rescue.habit, rescue.day, allowance: purchases.freezeAllowance); win()
+                                }
                             }
                         }
                         option(icon: "bandage.fill", tint: Ink.patch, title: store.repairCredits > 0 ? "Use a Streak Repair" : "Streak Repair",
@@ -332,23 +340,43 @@ struct SettingsSheet: View {
     @State private var watermark = ShareCard.watermarkOn
     @State private var csvURL: URL? = nil
     @State private var manage = false
+    @State private var manageSub = false
+    @State private var redeem = false
+    var planLine: String {
+        if purchases.plus { return "Chain Plus. Thank you." }
+        if purchases.ownsUnlimited { return purchases.grandfathered ? "Unlimited: you bought Chain before it went free" : "Unlimited, yours for good" }
+        return "Free: three habits, the Next Up widget, the last 90 days"
+    }
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Settings.").font(.big(26)).foregroundStyle(Ink.white).padding(.top, 22)
                 VStack(alignment: .leading, spacing: 12) {
-                    Eyebrow("Chain Unlimited")
-                    HStack {
-                        Image(systemName: purchases.unlocked ? "checkmark.seal.fill" : "lock.fill").foregroundStyle(purchases.unlocked ? Ink.lime : Ink.grey)
-                        Text(purchases.unlocked ? (purchases.grandfathered ? "Unlocked: you bought Chain before it went free" : "Unlocked. Thank you.") : "Free: three habits, the Next Up widget, the last 90 days")
-                            .font(.ui(14, .heavy)).foregroundStyle(Ink.white)
+                    Eyebrow("Your plan")
+                    HStack(alignment: .top) {
+                        Image(systemName: purchases.plus ? "sparkles" : purchases.unlocked ? "checkmark.seal.fill" : "lock.open.fill").foregroundStyle(purchases.unlocked ? Ink.lime : Ink.grey)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(planLine).font(.ui(14, .heavy)).foregroundStyle(Ink.white)
+                            if purchases.plus, let d = purchases.plusRenewal { Text("Renews or ends \(d.formatted(date: .abbreviated, time: .omitted))").font(.ui(12, .medium)).foregroundStyle(Ink.grey) }
+                        }
                     }
-                    if !purchases.unlocked {
-                        LimeButton(title: "Unlock for \(purchases.priceText), once", icon: "infinity") { dismiss(); DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { router.paywall = .settings } }
+                    if !purchases.plus {
+                        LimeButton(title: purchases.ownsUnlimited ? "Add Chain Plus" : "See plans", icon: "sparkles") {
+                            dismiss(); DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { router.paywall = purchases.ownsUnlimited ? .plus : .settings }
+                        }
+                    } else {
+                        GreyButton(title: "Manage subscription", icon: "gearshape") { manageSub = true }
                     }
-                    GreyButton(title: purchases.busy == "restore" ? "Restoring…" : "Restore purchases", icon: "arrow.clockwise") { Task { await purchases.restore() } }
+                    HStack(spacing: 8) {
+                        GreyButton(title: purchases.busy == "restore" ? "Restoring…" : "Restore", icon: "arrow.clockwise") { Task { await purchases.restore() } }
+                        GreyButton(title: "Redeem code", icon: "giftcard") { redeem = true }
+                    }
                     if let m = purchases.message { Text(m).font(.ui(12, .medium)).foregroundStyle(Ink.amber) }
-                }.tile()
+                    HStack(spacing: 16) {
+                        Link("Terms of Use", destination: Purchases.terms)
+                        Link("Privacy Policy", destination: Purchases.privacy)
+                    }.font(.ui(12, .heavy)).foregroundStyle(Ink.dim)
+                }.frame(maxWidth: .infinity, alignment: .leading).tile()
 
                 Button { dismiss(); DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { router.shop = true } } label: {
                     HStack(spacing: 12) {
@@ -381,8 +409,12 @@ struct SettingsSheet: View {
 
                 VStack(alignment: .leading, spacing: 12) {
                     HStack { Eyebrow("Streak protection"); Spacer() }
-                    row("snowflake", Ink.ice, "\(store.freezesLeft(pro: purchases.unlocked)) of \(purchases.unlocked ? 3 : 1) freezes left this month", "Hold a missed square in Week to use one.")
-                    row("bandage.fill", Ink.patch, store.repairCredits > 0 ? "\(store.repairCredits) Streak Repair\(store.repairCredits == 1 ? "" : "s") banked" : "Streak Repair, \(purchases.price(Purchases.repairID)) each", "Patch a missed day in gold when the freezes run out.")
+                    row("snowflake", Ink.ice, "\(store.freezesLeft(purchases.freezeAllowance)) freezes left", "\(purchases.freezeAllowance) a month on your plan" + (store.bonusFreezes > 0 ? ", plus \(store.bonusFreezes) banked from Freeze Packs" : "") + ". Hold a missed square in Week to use one.")
+                    row("bandage.fill", Ink.patch, store.repairCredits > 0 ? "\(store.repairCredits) Streak Repair\(store.repairCredits == 1 ? "" : "s") banked" : "No Streak Repairs banked", purchases.plus ? "Plus adds three at the start of every month. They patch a missed day in gold." : "Patch a missed day in gold when the freezes run out.")
+                    HStack(spacing: 8) {
+                        GreyButton(title: "Freeze Pack, \(purchases.price(Purchases.freezesID))", icon: "snowflake") { Task { await purchases.buy(Purchases.freezesID) } }
+                        GreyButton(title: "Repair, \(purchases.price(Purchases.repairID))", icon: "bandage") { Task { await purchases.buy(Purchases.repairID) } }
+                    }.disabled(purchases.busy != nil)
                 }.tile()
 
                 VStack(alignment: .leading, spacing: 12) {
@@ -406,8 +438,9 @@ struct SettingsSheet: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     Eyebrow("Widgets and Siri")
-                    Text("Touch and hold your Home Screen, tap Edit, then Add Widget, and pick Chain. Next Up is free; Today, Quilt and the Lock Screen line come with Unlimited.").font(.ui(13, .medium)).foregroundStyle(Ink.grey)
-                    Text("Say \"Log Read in Chain\" to Siri, or use the Log a habit shortcut.").font(.ui(13, .medium)).foregroundStyle(Ink.grey)
+                    Text("Touch and hold your Home Screen, tap Edit, then Add Widget, and pick Chain. Next Up, Best Chain and the Lock Screen ring are free; Today and the Lock Screen line come with Unlimited or Plus.").font(.ui(13, .medium)).foregroundStyle(Ink.grey)
+                    Text("Control Center: add Log Next Habit to tick the next one off from anywhere.").font(.ui(13, .medium)).foregroundStyle(Ink.grey)
+                    Text("Siri: \"Log Read in Chain\" or \"How's my chain in Chain\".").font(.ui(13, .medium)).foregroundStyle(Ink.grey)
                 }.tile()
 
                 VStack(alignment: .leading, spacing: 6) {
@@ -418,6 +451,8 @@ struct SettingsSheet: View {
             }.padding(18)
         }
         .sheet(isPresented: $manage) { HabitsManager().presentationBackground(Ink.bg2).presentationDetents([.large]) }
+        .manageSubscriptionsSheet(isPresented: $manageSub)
+        .offerCodeRedemption(isPresented: $redeem) { _ in Task { await purchases.refreshEntitlement() } }
         .task {
             await purchases.loadProducts()
             let u = URL.temporaryDirectory.appending(path: "Chain export \(Day.today).csv")
@@ -485,7 +520,7 @@ struct ShopSheet: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Eyebrow("Make it yours")
                         Text("Themes.").font(.big(32)).foregroundStyle(Ink.white)
-                        Text("Each one recolours the whole app, the widgets and the app icon. \(purchases.price(Purchases.themeID("ember"))) each, yours for good.").font(.ui(14, .medium)).foregroundStyle(Ink.grey)
+                        Text(purchases.plus ? "Each one recolours the whole app, the widgets and the app icon. Every theme comes with Plus." : "Each one recolours the whole app, the widgets and the app icon. \(purchases.price(Purchases.themeID("ember"))) each, yours for good, or all of them with Plus.").font(.ui(14, .medium)).foregroundStyle(Ink.grey)
                     }.padding(.top, 50)
                     LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
                         ForEach(Palette.all) { p in themeCard(p) }
@@ -518,7 +553,7 @@ struct ShopSheet: View {
                             }
                         }
                     }.tile()
-                    Text("Purchases are one-time and restore on any of your devices from Settings.").font(.ui(12, .medium)).foregroundStyle(Ink.dim).frame(maxWidth: .infinity).multilineTextAlignment(.center)
+                    Text(purchases.plus ? "Themes and celebrations are yours while Plus is active. Ones you bought stay yours for good." : "Theme and celebration purchases are one-time and restore on any of your devices from Settings.").font(.ui(12, .medium)).foregroundStyle(Ink.dim).frame(maxWidth: .infinity).multilineTextAlignment(.center)
                     if let m = purchases.message { Text(m).font(.ui(12, .medium)).foregroundStyle(Ink.amber).frame(maxWidth: .infinity) }
                 }.padding(.horizontal, 18).padding(.bottom, 30)
             }

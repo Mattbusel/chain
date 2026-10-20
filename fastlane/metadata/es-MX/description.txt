@@ -1,0 +1,47 @@
+Chain es el rastreador de hábitos que te toma cinco segundos al día y vuelve tu progreso imposible de ignorar. Marca un hábito, mira cómo se llena el anillo y no rompas la cadena. Cada hábito tiene un año de cuadritos cosidos como una colcha: color donde lo hiciste, un hueco donde no.
+
+NOVEDADES DE LA 1.3
+• Un reto cada mes: un hábito, un mes, y con cuatro de cada cinco días ganas la insignia. El de este mes está abierto para todos
+• Hitos celebrados a los 7, 30, 100 y 365 días, con una imagen para compartir
+• Análisis: este mes contra el anterior, hábitos que se impulsan entre sí, tu mejor hora del día y cuándo cada cadena llega a su siguiente hito
+• Log Next Habit en el Centro de control, en la pantalla bloqueada y el botón de acción
+• Un widget Best Chain que luce increíble en StandBy, y una línea bajo el reloj en la pantalla bloqueada
+• Pregúntale a Siri "How's my chain?"
+
+MÁRCALO DESDE DONDE SEA
+• Widgets interactivos en la pantalla de inicio: marca sin abrir la app
+• Anillo, línea y conteo compacto en la pantalla bloqueada
+• "Log Read in Chain" con Siri, o el atajo Log a habit
+• Un recordatorio con botón de Listo que calla los días que ya cumpliste
+
+HÁBITOS PARA LA VIDA REAL
+• Diario, ciertos días de la semana o X veces por semana
+• Cantidades y metas: 8 vasos, 20 páginas, 10,000 pasos, que se llenan toque a toque
+• La app Salud marca por ti pasos, ejercicio, minutos de atención plena y entrenamientos
+• Hábitos para dejar: cuenta los días limpio, registra una recaída y conserva tu mejor marca
+• Grupos de mañana, tarde y noche: el día se lee de arriba abajo
+
+¿TE SALTASTE UN DÍA? LA CADENA AGUANTA
+• Los congelamientos cubren un día de enfermedad sin romper la cadena
+• Pausa un hábito en vacaciones y retómalo al regresar
+• Streak Repair parcha en dorado un día perdido cuando se acaban los congelamientos
+
+MIRA TODO TU AÑO
+• Cuadrícula semanal para registrar o corregir cualquier día
+• La colcha del año para cada hábito, con totales, mejor cadena y porcentaje de cumplimiento
+• Estadísticas: mejores y peores días de la semana, días perfectos y cadenas más largas
+• Notas en cualquier día, y una imagen de tu cadena para compartir
+
+PLANES
+• Gratis: tres hábitos, el reto del mes (aparte de los tres), widgets Next Up y Best Chain, anillo de la pantalla bloqueada, un recordatorio diario, los últimos 90 días de la colcha, un congelamiento al mes, contadores para dejar hábitos, notas, Siri y Centro de control
+• Chain Unlimited, un solo pago, tuyo para siempre: hábitos ilimitados, todos los widgets, un recordatorio por hábito, cantidades y app Salud, tres congelamientos al mes y pausas, colcha completa, respaldo en iCloud y exportación a CSV
+• Chain Plus, mensual o anual: todo lo de Unlimited, más tres Streak Repair al inicio de cada mes, cinco congelamientos al mes, todos los temas y celebraciones, toda la biblioteca de retos cuando quieras, y Análisis. El plan anual empieza con una prueba gratis de 1 semana para nuevos suscriptores
+• Extras pequeños: Streak Repair y Freeze Pack, cinco temas de color con íconos a juego, y el paquete de celebraciones
+• ¿Compraste Chain antes de que fuera gratis? Unlimited ya es tuyo
+
+Chain Plus es una suscripción con renovación automática. El pago se carga a tu Apple ID al confirmar la compra (después de la prueba gratis, si inicias una). Se renueva automáticamente al mismo precio salvo que la canceles al menos 24 horas antes del fin del periodo actual, y la renovación se cobra a tu cuenta en las 24 horas previas al fin del periodo. Adminístrala o cancélala cuando quieras en la configuración de tu cuenta del App Store. Cualquier parte no usada de una prueba gratis termina cuando te suscribes.
+
+Términos de uso (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Política de privacidad: https://tensorust.com/apps/chain/privacy/
+
+Sin cuenta, sin anuncios, sin rastreo. Tus hábitos se quedan en tu iPhone, y en tu propio iCloud si activas el respaldo.

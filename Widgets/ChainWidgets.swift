@@ -1,3 +1,4 @@
+import AppIntents
 import SwiftUI
 import WidgetKit
 
@@ -5,8 +6,36 @@ import WidgetKit
 struct ChainWidgetBundle: WidgetBundle {
     var body: some Widget {
         NextUpWidget()
+        BestChainWidget()
         TodayWidget()
         LockWidget()
+        if #available(iOS 18.0, *) { LogNextControl() }
+    }
+}
+
+/// Control Center, Lock Screen controls and the Action button: one press ticks off the next habit.
+@available(iOS 18.0, *)
+struct LogNextControl: ControlWidget {
+    var body: some ControlWidgetConfiguration {
+        StaticControlConfiguration(kind: "com.mattbusel.chainhabits.lognext") {
+            ControlWidgetButton(action: LogNextHabitIntent()) {
+                Label("Log Next Habit", systemImage: "checkmark.square.fill")
+            }
+        }
+        .displayName("Log Next Habit")
+        .description("Ticks off the next Chain habit still due today.")
+    }
+}
+
+/// Free: the longest chain going. Small fits StandBy too.
+struct BestChainWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "bestchain", provider: Provider()) { e in
+            BestChainView(snap: e.snap).containerBackground(Ink.bg, for: .widget)
+        }
+        .configurationDisplayName("Best chain")
+        .description("Your longest chain going, over twelve weeks of the quilt.")
+        .supportedFamilies([.systemSmall])
     }
 }
 
@@ -70,7 +99,7 @@ struct LockWidget: Widget {
         }
         .configurationDisplayName("Lock Screen")
         .description("Today's count on your Lock Screen.")
-        .supportedFamilies([.accessoryCircular, .accessoryRectangular])
+        .supportedFamilies([.accessoryCircular, .accessoryRectangular, .accessoryInline])
     }
 }
 
@@ -79,6 +108,7 @@ struct LockFamilyView: View {
     let snap: Snapshot
     var body: some View {
         if family == .accessoryCircular { LockCircularView(snap: snap) }
+        else if family == .accessoryInline { LockInlineView(snap: snap) }
         else if snap.unlocked { LockRectView(snap: snap) }
         else { Text("Chain Unlimited unlocks this widget").font(.ui(12, .semibold)) }
     }

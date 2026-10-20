@@ -234,6 +234,20 @@ struct LogHabitIntent: AppIntent {
     }
 }
 
+/// "How's my chain?": today's count and the longest chain going, spoken back.
+struct ChainStatusIntent: AppIntent {
+    static var title: LocalizedStringResource = "How's my chain"
+    static var description = IntentDescription("Says how many habits are done today and your longest chain going.")
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        let s = Store(demo: false)
+        let due = s.dueToday, done = s.doneToday
+        let top = s.active.filter { $0.kind == .build }.max { s.streak($0) < s.streak($1) }
+        var line = due.isEmpty ? "Nothing is due today." : done == due.count ? "Clean sweep: all \(due.count) done today." : "\(done) of \(due.count) done today."
+        if let top, s.streak(top) > 1 { line += " Longest going: \(top.name), \(s.streak(top)) days." }
+        return .result(dialog: "\(line)")
+    }
+}
+
 struct ChainShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(intent: LogHabitIntent(), phrases: [
@@ -241,5 +255,14 @@ struct ChainShortcuts: AppShortcutsProvider {
             "Check off \(\.$habit) in \(.applicationName)",
             "Log a habit in \(.applicationName)",
         ], shortTitle: "Log a habit", systemImageName: "checkmark.square.fill")
+        AppShortcut(intent: LogNextHabitIntent(), phrases: [
+            "Log next habit in \(.applicationName)",
+            "Tick off the next habit in \(.applicationName)",
+        ], shortTitle: "Log next habit", systemImageName: "checkmark.circle.fill")
+        AppShortcut(intent: ChainStatusIntent(), phrases: [
+            "How's my chain in \(.applicationName)",
+            "How am I doing in \(.applicationName)",
+            "\(.applicationName) status",
+        ], shortTitle: "How's my chain", systemImageName: "link")
     }
 }

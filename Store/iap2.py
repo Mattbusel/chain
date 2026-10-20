@@ -1,7 +1,7 @@
-"""The 1.2 in-app purchases: Streak Repair and the 99-cent themes and celebration pack.
+"""The 99-cent in-app purchases: Streak Repair and Freeze Pack (consumables), the themes and celebration pack.
 
     python Store/iap2.py create                 make every product (idempotent): text, $0.99, all territories
-    python Store/iap2.py shot <kind> <png>      review screenshot for every product of a kind (repair | theme | celebrate)
+    python Store/iap2.py shot <kind> <png>      review screenshot for every product of a kind (repair | freezes | theme | celebrate)
     python Store/iap2.py status                 show each product's state
     python Store/iap2.py submit                 queue every product for the next version submission
 """
@@ -24,6 +24,10 @@ PRODUCTS = [
      "Consumable. When a chain of 2+ days breaks, Today shows a 'chain broke' banner (also: Week tab, hold a missed square, "
      "Streak Repair). The sheet offers a free freeze if any are left this month, then Streak Repair for $0.99, which patches "
      "the missed day in gold and keeps the chain. Each purchase repairs one day."),
+    ("freezes", "CONSUMABLE", "Freeze Pack", "Three freezes that never expire. Use them any month.", "freezes",
+     "Consumable, new in 1.3. Each purchase adds 3 freezes that never expire; they are used after the month's allowance "
+     "(1 free, 3 Unlimited, 5 Plus) runs out. Where: Settings (gear on Today) > Streak protection > Freeze Pack, or the "
+     "rescue sheet that opens when a 2+ day chain breaks and no freezes are left (it buys the pack and uses one on the missed day)."),
     ("theme.ember", "NON_CONSUMABLE", "Ember Theme", "An orange theme for the app and widgets, with its icon.", "theme", THEME_NOTE),
     ("theme.tide", "NON_CONSUMABLE", "Tide Theme", "A cyan theme for the app and widgets, with its icon.", "theme", THEME_NOTE),
     ("theme.bloom", "NON_CONSUMABLE", "Bloom Theme", "A pink theme for the app and widgets, with its icon.", "theme", THEME_NOTE),
@@ -131,9 +135,29 @@ def submit():
         print(suffix, "queued" if r else "refused")
 
 
+def release(version: str = None):
+    """Queue every product, then submit the version with them in one review submission."""
+    submit()
+    aid = iap.app_id()
+    version = version or asc.current_version()
+    v = asc.call("GET", f"/v1/apps/{aid}/appStoreVersions", params={"filter[versionString]": version})["data"][0]
+    subs = asc.call("GET", "/v1/reviewSubmissions", params={"filter[app]": aid, "filter[state]": "READY_FOR_REVIEW", "filter[platform]": "IOS"})
+    sub = subs["data"][0] if subs and subs.get("data") else asc.call("POST", "/v1/reviewSubmissions", {"data": {
+        "type": "reviewSubmissions", "attributes": {"platform": "IOS"},
+        "relationships": {"app": {"data": {"type": "apps", "id": aid}}}}})["data"]
+    items = asc.call("GET", f"/v1/reviewSubmissions/{sub['id']}/items") or {"data": []}
+    if not items["data"]:
+        r = asc.call("POST", "/v1/reviewSubmissionItems", {"data": {"type": "reviewSubmissionItems", "relationships": {
+            "reviewSubmission": {"data": {"type": "reviewSubmissions", "id": sub["id"]}},
+            "appStoreVersion": {"data": {"type": "appStoreVersions", "id": v["id"]}}}}})
+        print("version item", "added" if r else "FAILED")
+    done = asc.call("PATCH", f"/v1/reviewSubmissions/{sub['id']}", {"data": {"type": "reviewSubmissions", "id": sub["id"], "attributes": {"submitted": True}}})
+    print("review submission:", "SUBMITTED" if done else "failed")
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "status"
     if cmd == "shot":
         shot(sys.argv[2], sys.argv[3])
     else:
-        {"create": create, "status": status, "submit": submit}.get(cmd, lambda: sys.exit(__doc__))()
+        {"create": create, "status": status, "submit": submit, "release": release}.get(cmd, lambda: sys.exit(__doc__))()

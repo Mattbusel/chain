@@ -1,0 +1,14 @@
+O Chain 1.3 é a maior atualização até agora.
+
+• Desafios mensais: um hábito, um mês, e quatro dias em cada cinco garantem o selo. O deste mês é aberto a todos
+• Marcos aos 7, 30, 100 e 365 dias, com uma imagem para compartilhar
+• Insights: este mês contra o anterior, hábitos que se fortalecem entre si, seu melhor horário do dia e seus próximos marcos
+• Log Next Habit na Central de Controle, na Tela Bloqueada e no botão de Ação
+• Widget Best Chain para a Tela de Início e o modo Em Espera, mais uma contagem compacta na Tela Bloqueada
+• Siri: "How's my chain?"
+• Chain Plus, um novo plano mensal ou anual: tudo do Unlimited mais três Streak Repair todo mês, cinco congelamentos por mês, todos os temas e a biblioteca completa de desafios. O Unlimited continua sendo um desbloqueio de pagamento único
+• Freeze Pack: três congelamentos que nunca expiram
+• Suporte a texto maior, rótulos do VoiceOver e marcações mais suaves
+• Corrigido: registrar um dia passado de um hábito com quantidade agora preenche a meta inteira, e apagar um hábito remove todo o seu histórico
+
+Tudo o que você registrou continua aqui.

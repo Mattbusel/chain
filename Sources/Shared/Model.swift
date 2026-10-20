@@ -79,6 +79,8 @@ struct Habit: Codable, Identifiable, Hashable {
     var part: Part = .anytime
     var pauses: [Pause] = []
     var archived: Bool = false
+    /// The challenge that added this habit, if any. The month's featured challenge doesn't count toward the free three.
+    var challenge: String? = nil
 
     var isAmount: Bool { target > 1 || health != nil }
 }
@@ -106,6 +108,7 @@ extension Habit {
         part = (try? c.decodeIfPresent(Part.self, forKey: .part)) ?? .anytime
         pauses = try c.decodeIfPresent([Pause].self, forKey: .pauses) ?? []
         archived = try c.decodeIfPresent(Bool.self, forKey: .archived) ?? false
+        challenge = try? c.decodeIfPresent(String.self, forKey: .challenge)
     }
 }
 
@@ -171,6 +174,11 @@ final class Store {
     var notes: [String: [String: String]] = [:]   // day -> habit id -> note
     var freezeSpend: [String: Int] = [:]          // yyyy-MM -> freezes used that month
     var repairCredits = 0
+    /// Freezes from Freeze Packs: spent once the month's allowance is gone, and they never expire.
+    var bonusFreezes = 0
+    /// yyyy-MM of the last Chain Plus monthly top-up.
+    var plusRefill = ""
+    var runs: [ChallengeRun] = []
     var stamp: Double = 0
     var weekOffset = 0
     @ObservationIgnored var didSave: (() -> Void)?
@@ -186,6 +194,9 @@ final class Store {
         var notes: [String: [String: String]]? = nil
         var freezeSpend: [String: Int]? = nil
         var repairCredits: Int? = nil
+        var bonusFreezes: Int? = nil
+        var plusRefill: String? = nil
+        var runs: [ChallengeRun]? = nil
         var stamp: Double? = nil
     }
 
@@ -206,11 +217,13 @@ final class Store {
         counts = disk.counts ?? [:]; frozen = disk.frozen ?? [:]; repaired = disk.repaired ?? [:]
         notes = disk.notes ?? [:]; freezeSpend = disk.freezeSpend ?? [:]
         repairCredits = disk.repairCredits ?? 0; stamp = disk.stamp ?? 0
+        bonusFreezes = disk.bonusFreezes ?? 0; plusRefill = disk.plusRefill ?? ""; runs = disk.runs ?? []
         return true
     }
     func encoded() -> Data? {
         try? JSONEncoder().encode(Disk(habits: habits, log: log, counts: counts, frozen: frozen, repaired: repaired,
-                                       notes: notes, freezeSpend: freezeSpend, repairCredits: repairCredits, stamp: stamp))
+                                       notes: notes, freezeSpend: freezeSpend, repairCredits: repairCredits,
+                                       bonusFreezes: bonusFreezes, plusRefill: plusRefill, runs: runs, stamp: stamp))
     }
     /// Debounced, off the main thread: for the app, where taps come in bursts.
     func save() {
@@ -233,6 +246,8 @@ final class Store {
     }
 
     var active: [Habit] { habits.filter { !$0.archived } }
+    /// What the free limit counts: everything but the month's challenge habits.
+    var counted: [Habit] { active.filter { $0.challenge == nil || Challenges.byID($0.challenge!)?.month == 0 } }
 
     // MARK: Days
 
@@ -360,10 +375,31 @@ final class Store {
     // MARK: Freezes and repairs
 
     func freezesUsed(_ month: String = Day.month(Day.today)) -> Int { freezeSpend[month] ?? 0 }
-    func freezesLeft(pro: Bool) -> Int { max(0, (pro ? 3 : 1) - freezesUsed()) }
-    func freeze(_ h: Habit, _ day: String) {
+    /// This month's allowance left (1 free, 3 Unlimited, 5 Plus) plus any banked from Freeze Packs.
+    func freezesLeft(_ allowance: Int) -> Int { max(0, allowance - freezesUsed()) + bonusFreezes }
+    func freeze(_ h: Habit, _ day: String, allowance: Int) {
+        guard freezesLeft(allowance) > 0, !isFrozen(h, day) else { return }
         frozen[day, default: []].append(h.id)
-        freezeSpend[Day.month(Day.today), default: 0] += 1
+        if freezesUsed() < allowance { freezeSpend[Day.month(Day.today), default: 0] += 1 } else { bonusFreezes = max(0, bonusFreezes - 1) }
+        save()
+    }
+    /// Chain Plus: three Streak Repairs at the start of every month the subscription is active.
+    func refillPlus() {
+        let m = Day.month(Day.today)
+        guard plusRefill != m else { return }
+        plusRefill = m
+        repairCredits += 3
+        save()
+    }
+    /// Delete a habit and every trace of it.
+    func delete(_ h: Habit) {
+        habits.removeAll { $0.id == h.id }
+        for k in Array(log.keys) { log[k]?.removeAll { $0 == h.id }; if log[k]?.isEmpty == true { log[k] = nil } }
+        for k in Array(frozen.keys) { frozen[k]?.removeAll { $0 == h.id }; if frozen[k]?.isEmpty == true { frozen[k] = nil } }
+        for k in Array(repaired.keys) { repaired[k]?.removeAll { $0 == h.id }; if repaired[k]?.isEmpty == true { repaired[k] = nil } }
+        for k in Array(counts.keys) { counts[k]?[h.id.uuidString] = nil; if counts[k]?.isEmpty == true { counts[k] = nil } }
+        for k in Array(notes.keys) { notes[k]?[h.id.uuidString] = nil; if notes[k]?.isEmpty == true { notes[k] = nil } }
+        runs.removeAll { $0.habit == h.id && !$0.won }
         save()
     }
     func repair(_ h: Habit, _ day: String) {

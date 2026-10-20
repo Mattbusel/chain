@@ -1,5 +1,13 @@
+import StoreKit
 import SwiftUI
+import TipKit
 import WidgetKit
+
+/// Screenshot, review-recording and app-preview runs: fixed demo data, no prompts.
+enum DemoRun {
+    static let args = ProcessInfo.processInfo.arguments
+    static var on: Bool { args.contains("-shot") || args.contains("-demoAutoplay") || args.contains("-preview") }
+}
 
 @main
 struct ChainApp: App {
@@ -10,18 +18,24 @@ struct ChainApp: App {
     @State private var purchases: Purchases
     init() {
         let a = ProcessInfo.processInfo.arguments
-        let demo = a.contains("-shot") || a.contains("-demoAutoplay")
+        let demo = DemoRun.on
         if demo { Palette.current = Palette.byID(a.contains("ember") ? "ember" : "lime") }
         let s = Store(demo: demo)
         if a.contains("rescue") { Demo.breakYesterday(s) }
         _store = State(initialValue: s)
         _purchases = State(initialValue: Purchases(demo: demo))
+        if !demo {
+            TypeScale.on = true
+            try? Tips.configure([.displayFrequency(.immediate)])
+        }
     }
     var body: some Scene {
         WindowGroup {
             RootView().environment(store).environment(router).environment(purchases).preferredColorScheme(.dark).tint(Ink.lime)
                 .onAppear {
                     purchases.onRepair = { [store] in store.repairCredits += 1; store.save() }
+                    purchases.onFreezes = { [store] in store.bonusFreezes += Purchases.packFreezes; store.save() }
+                    purchases.onPlus = { [store] in store.refillPlus() }
                     store.didSave = { [store, purchases] in
                         CloudSync.push(store)
                         WidgetCenter.shared.reloadAllTimelines()
@@ -32,6 +46,7 @@ struct ChainApp: App {
                     Autopilot.shared.run(store, router)
                     if !router.demo { ChainShortcuts.updateAppShortcutParameters() }
                 }
+                .onOpenURL { router.open($0) }
                 .onReceive(NotificationCenter.default.publisher(for: .chainExternalChange)) { _ in store.load() }
                 .onReceive(NotificationCenter.default.publisher(for: NSUbiquitousKeyValueStore.didChangeExternallyNotification)) { _ in
                     if CloudSync.pull(store) { WidgetCenter.shared.reloadAllTimelines() }
@@ -44,6 +59,7 @@ struct ChainApp: App {
                     Task {
                         await Health.sync(store)
                         Reminders.sync(store, pro: purchases.unlocked)
+                        if let r = store.checkWins().first, router.moment == nil { router.moment = .won(r) }
                         router.checkRescue(store)
                     }
                 }
@@ -74,16 +90,34 @@ final class Router {
     var shop = false
     var rescue: Rescue? = nil
     var noting: Habit? = nil
+    var challenges = false
+    var insights = false
+    var moment: Moment? = nil
     var celebrating = 0
     var onboarding = false
     var showcase = false
     /// Bumped when the theme changes, so every view redraws in the new colour.
     var themeTick = 0
-    let demo = ProcessInfo.processInfo.arguments.contains("-shot") || ProcessInfo.processInfo.arguments.contains("-demoAutoplay")
+    let demo = DemoRun.on
 
-    /// The one door for a new habit: free keeps three.
+    /// The one door for a new habit: free keeps three (the month's challenge habit doesn't count).
     @MainActor func newHabit(_ s: Store, _ p: Purchases) {
-        if s.active.count >= Purchases.freeHabits && !p.unlocked { paywall = .habits } else { creating = true }
+        if s.counted.count >= Purchases.freeHabits && !p.unlocked { paywall = .habits } else { creating = true }
+    }
+    /// chainhabits://challenge, ://plus, ://insights, ://today, ://week, ://year, ://stats, ://new
+    func open(_ url: URL) {
+        guard url.scheme == "chainhabits" else { return }
+        let what = url.host ?? url.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        switch what {
+        case "challenge", "challenges": tab = .today; challenges = true
+        case "plus": paywall = .plus
+        case "insights": tab = .stats; insights = true
+        case "week": tab = .week
+        case "year": tab = .year
+        case "stats": tab = .stats
+        case "new": creating = true
+        default: tab = .today
+        }
     }
     /// Offer to save a chain that broke, once per chain and day.
     func checkRescue(_ s: Store) {
@@ -103,11 +137,17 @@ final class Router {
         case "stats": tab = .stats
         case "edit": editing = s.habits[1]
         case "detail": detail = s.habits[0]
+        case "quit": detail = s.habits.first { $0.kind == .quit }
         case "paywall": paywall = .widgets
+        case "plus": paywall = .plus
         case "themes": shop = true
+        case "settings": settings = true
         case "rescue": rescue = s.rescues().first
         case "onboarding": onboarding = true
         case "widgets": showcase = true
+        case "challenges": challenges = true
+        case "insights": tab = .stats; insights = true
+        case "milestone": moment = .streak(s.habits[0], s.streak(s.habits[0]))
         case "done": for h in s.dueToday where !s.satisfiedToday(h) { s.markDone(h, Day.today) }; celebrating += 1
         default: break
         }
@@ -118,6 +158,7 @@ struct RootView: View {
     @Environment(Store.self) private var store
     @Environment(Router.self) private var router
     @Environment(Purchases.self) private var purchases
+    @Environment(\.requestReview) private var requestReview
     var body: some View {
         @Bindable var router = router
         ZStack(alignment: .bottom) {
@@ -142,6 +183,11 @@ struct RootView: View {
         .sheet(item: $router.paywall) { r in Paywall(reason: r).presentationBackground(Ink.bg).presentationDetents([.large]) }
         .sheet(isPresented: $router.settings) { SettingsSheet().presentationBackground(Ink.bg2).presentationDetents([.large]) }
         .sheet(isPresented: $router.shop) { ShopSheet().presentationBackground(Ink.bg).presentationDetents([.large]) }
+        .sheet(isPresented: $router.challenges) { ChallengesSheet().presentationBackground(Ink.bg).presentationDetents([.large]) }
+        .sheet(isPresented: $router.insights) { InsightsSheet().presentationBackground(Ink.bg).presentationDetents([.large]) }
+        .sheet(item: $router.moment, onDismiss: { if !router.demo { ReviewAsk.maybe(requestReview) } }) { m in
+            MomentSheet(moment: m).presentationBackground(Ink.bg).presentationDetents([.large])
+        }
         .sheet(item: $router.rescue) { r in RescueSheet(rescue: r).presentationBackground(Ink.bg).presentationDetents([.medium, .large]) }
         .sheet(item: $router.noting) { h in NoteSheet(habit: h).presentationBackground(Ink.bg2).presentationDetents([.height(320)]) }
         .fullScreenCover(isPresented: $router.onboarding) { Onboarding() }

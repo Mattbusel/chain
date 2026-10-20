@@ -25,7 +25,7 @@ jobs:
           echo "UDID=$udid" >> "$GITHUB_ENV"
           xcodebuild build -project Chain.xcodeproj -scheme Chain -configuration Debug             -destination "id=$udid" -derivedDataPath dd CODE_SIGNING_ALLOWED=NO | xcpretty
       - name: Screenshots
-        timeout-minutes: 15
+        timeout-minutes: 25
         run: |
           # A fresh device: bootstatus on the runner's default simulator hung for 15+ minutes before.
           rt=$(xcrun simctl list runtimes | grep -oE "com.apple.CoreSimulator.SimRuntime.iOS-[0-9-]+" | sort -V | tail -1)
@@ -43,13 +43,37 @@ jobs:
           xcrun simctl install "$udid" "$app"
           mkdir -p shots
           i=0
-          for shot in today widgets year detail rescue themes week stats edit paywall onboarding done; do
+          for shot in today widgets challenges insights year rescue edit detail quit themes week stats paywall settings milestone onboarding done; do
             xcrun simctl terminate "$udid" com.mattbusel.chainhabits || true
             xcrun simctl launch "$udid" com.mattbusel.chainhabits -shot $shot
             sleep 8
             xcrun simctl io "$udid" screenshot "shots/$(printf %02d $i)-$shot.png"
             i=$((i+1))
           done
+      - name: Preview video
+        timeout-minutes: 10
+        run: |
+          # The App Store preview: the app drives itself with -preview and writes Documents/demo_done.
+          udid=$(xcrun simctl list devices | grep "shots (" | head -1 | grep -oE "[0-9A-F-]{36}")
+          xcrun simctl terminate "$udid" com.mattbusel.chainhabits || true
+          data=$(xcrun simctl get_app_container "$udid" com.mattbusel.chainhabits data)
+          rm -f "$data/Documents/demo_done"
+          mkdir -p capture
+          xcrun simctl io "$udid" recordVideo --codec h264 --force capture/preview.mp4 &
+          rec=$!
+          sleep 3
+          xcrun simctl launch "$udid" com.mattbusel.chainhabits -preview
+          for i in $(seq 1 240); do [ -f "$data/Documents/demo_done" ] && break; sleep 0.5; done
+          sleep 1
+          kill -INT $rec 2>/dev/null || true
+          wait $rec 2>/dev/null || true
+          ls -la capture/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: preview
+          path: capture/*.mp4
+          if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         if: always()
         with:

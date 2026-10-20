@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// One accent in three depths. Lime is free; the others are 99-cent themes, each with a matching app icon.
 struct Palette: Identifiable, Hashable {
@@ -52,10 +53,17 @@ enum Ink {
     static let patch = Color(red: 0.98, green: 0.75, blue: 0.14)
 }
 
+/// Dynamic Type for the fixed-size rounded type: the app turns it on, widgets keep their sizes.
+/// Capped so the week grid and the quilt still fit at the largest settings.
+enum TypeScale {
+    static var on = false
+    static func size(_ s: CGFloat) -> CGFloat { on ? min(s * 1.35, UIFontMetrics.default.scaledValue(for: s)) : s }
+}
+
 extension Font {
-    static func big(_ size: CGFloat) -> Font { .system(size: size, weight: .heavy, design: .rounded) }
-    static func ui(_ size: CGFloat, _ w: Font.Weight = .semibold) -> Font { .system(size: size, weight: w, design: .rounded) }
-    static func num(_ size: CGFloat, _ w: Font.Weight = .heavy) -> Font { .system(size: size, weight: w, design: .rounded).monospacedDigit() }
+    static func big(_ size: CGFloat) -> Font { .system(size: TypeScale.size(size), weight: .heavy, design: .rounded) }
+    static func ui(_ size: CGFloat, _ w: Font.Weight = .semibold) -> Font { .system(size: TypeScale.size(size), weight: w, design: .rounded) }
+    static func num(_ size: CGFloat, _ w: Font.Weight = .heavy) -> Font { .system(size: TypeScale.size(size), weight: w, design: .rounded).monospacedDigit() }
 }
 
 struct CharcoalBackground: View {

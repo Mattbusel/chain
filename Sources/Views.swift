@@ -1,4 +1,5 @@
 import SwiftUI
+import TipKit
 
 // MARK: Today
 
@@ -29,7 +30,10 @@ struct TodayView: View {
                 }
             }
             .padding(.top, 14)
-            if let r = store.rescues().first { RescueBanner(rescue: r) }
+            if !store.active.isEmpty || router.demo { ChallengeCard() }
+            if !router.demo || DemoRun.args.contains("rescue"), let r = store.rescues().first { RescueBanner(rescue: r) }
+            if !router.demo && !due.isEmpty { TipView(HoldTip()).tint(Ink.lime) }
+            if !router.demo { TipView(WidgetTip()).tint(Ink.lime) }
             if grouped {
                 ForEach(Part.allCases.filter { p in p != .anytime } + [.anytime], id: \.self) { p in
                     let hs = due.filter { $0.part == p }
@@ -56,11 +60,11 @@ struct TodayView: View {
                 Button { router.paywall = .habits } label: {
                     HStack(spacing: 6) {
                         ForEach(0..<Purchases.freeHabits, id: \.self) { i in
-                            RoundedRectangle(cornerRadius: 3).fill(i < store.active.count ? Ink.lime : Ink.hole).frame(width: 12, height: 12)
+                            RoundedRectangle(cornerRadius: 3).fill(i < store.counted.count ? Ink.lime : Ink.hole).frame(width: 12, height: 12)
                         }
-                        Text("\(min(store.active.count, Purchases.freeHabits)) of \(Purchases.freeHabits) free habits").font(.ui(12, .heavy)).foregroundStyle(Ink.grey)
+                        Text("\(min(store.counted.count, Purchases.freeHabits)) of \(Purchases.freeHabits) habits").font(.ui(12, .heavy)).foregroundStyle(Ink.grey)
                         Spacer()
-                        Text("Unlimited").font(.ui(12, .heavy)).foregroundStyle(Ink.lime)
+                        Text("Go unlimited").font(.ui(12, .heavy)).foregroundStyle(Ink.lime)
                         Image(systemName: "chevron.right").font(.system(size: 10, weight: .black)).foregroundStyle(Ink.lime)
                     }.padding(.horizontal, 4)
                 }.buttonStyle(.plain)
@@ -86,8 +90,14 @@ struct HabitRow: View {
                 if after > before && after == store.dueToday.count {
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
                     router.celebrating += 1
+                    WidgetTip.sweeps += 1
                 } else {
                     UIImpactFeedbackGenerator(style: habit.isAmount && !store.done(habit, t) ? .light : .medium).impactOccurred()
+                }
+                if store.done(habit, t) && !router.demo {
+                    // A big moment gets its own sheet, after the celebration has had a second.
+                    let m: Moment? = store.checkWins().first.map { Moment.won($0) } ?? Milestones.check(store, habit).map { Moment.streak(habit, $0) }
+                    if let m { DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { router.moment = m } }
                 }
             } label: {
                 ZStack {
@@ -97,10 +107,11 @@ struct HabitRow: View {
                         RoundedRectangle(cornerRadius: 16, style: .continuous).trim(from: 0, to: p)
                             .stroke(Ink.lime, style: StrokeStyle(lineWidth: 3.5, lineCap: .round)).animation(.snappy, value: p)
                     }
-                    if dn { Image(systemName: "checkmark").font(.system(size: 24, weight: .black)).foregroundStyle(Ink.bg) } else { Text(habit.emoji).font(.system(size: 24)) }
+                    if dn { Image(systemName: "checkmark").font(.system(size: 24, weight: .black)).foregroundStyle(Ink.bg).transition(.scale.combined(with: .opacity)) } else { Text(habit.emoji).font(.system(size: 24)) }
                 }
                 .frame(width: 56, height: 56)
                 .scaleEffect(dn ? 1.0 : 0.96)
+                .symbolEffect(.bounce, value: dn)
             }.buttonStyle(.plain)
                 .accessibilityLabel(dn ? "\(habit.name), done" : "Tick off \(habit.name)")
             Button { router.detail = habit } label: {
@@ -123,6 +134,8 @@ struct HabitRow: View {
                     }
                 }.contentShape(Rectangle())
             }.buttonStyle(.plain)
+                .accessibilityLabel("\(habit.name), \(subtitle), \(store.streak(habit)) \(habit.frequency == .weekly ? "week" : "day") chain")
+                .accessibilityHint("Opens the habit's details")
         }
         .tile(padding: 12)
         .background(Group { if dn { RoundedRectangle(cornerRadius: 20, style: .continuous).fill(Ink.lime.opacity(0.06)) } })
@@ -263,7 +276,14 @@ struct WeekCell: View {
         let sq = store.square(habit, day), dn = store.done(habit, day)
         let na = !store.due(habit, day) || day > Day.today
         let missed: Bool = { if case .hole = sq { return true }; return false }()
-        Button { if day <= Day.today { withAnimation(.snappy) { store.toggle(habit, day) } } } label: {
+        Button {
+            guard day <= Day.today else { return }
+            withAnimation(.snappy) {
+                // A past day of an amount habit logs the whole target, not one step of it.
+                if habit.target > 1 && day != Day.today { if dn { store.setCount(habit, day, 0) } else { store.markDone(habit, day) }; store.save() }
+                else { store.toggle(habit, day) }
+            }
+        } label: {
             ZStack {
                 RoundedRectangle(cornerRadius: 9, style: .continuous).fill(dn ? Ink.lime : sq.stitched || isFrozenOrRepaired(sq) ? sq.color : Ink.bg2)
                     .overlay(RoundedRectangle(cornerRadius: 9, style: .continuous).strokeBorder(dn ? Ink.lime : day == Day.today ? Ink.dim : Ink.line2))
@@ -274,10 +294,11 @@ struct WeekCell: View {
             }.frame(height: 36).opacity(na && !dn ? 0.3 : 1)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("\(habit.name), \(Day.date(day).formatted(.dateTime.weekday(.wide).day())), \(dn ? "done" : store.isFrozen(habit, day) ? "frozen" : store.isRepaired(habit, day) ? "repaired" : missed ? "missed" : "not done")")
         .contextMenu {
             if missed {
-                let left = store.freezesLeft(pro: purchases.unlocked)
-                Button { store.freeze(habit, day) } label: { Label(left > 0 ? "Use a freeze (\(left) left this month)" : "No freezes left this month", systemImage: "snowflake") }.disabled(left == 0)
+                let left = store.freezesLeft(purchases.freezeAllowance)
+                Button { store.freeze(habit, day, allowance: purchases.freezeAllowance) } label: { Label(left > 0 ? "Use a freeze (\(left) left)" : "No freezes left", systemImage: "snowflake") }.disabled(left == 0)
                 Button { router.rescue = Rescue(habit: habit, day: day, lost: store.run(habit, from: Day.add(day, -1))) } label: { Label("Streak Repair…", systemImage: "bandage.fill") }
             }
             if store.isFrozen(habit, day) {
@@ -394,9 +415,11 @@ struct StatsView: View {
                 stat("\(bestS)", "longest chain ever")
                 stat("\(store.perfectDays(30))", "perfect days in 30")
             }
+            InsightsEntry()
             HStack(spacing: 10) {
                 Image(systemName: "snowflake").font(.system(size: 15, weight: .black)).foregroundStyle(Ink.ice)
-                Text("\(store.freezesLeft(pro: purchases.unlocked)) freeze\(store.freezesLeft(pro: purchases.unlocked) == 1 ? "" : "s") left this month").font(.ui(13, .heavy)).foregroundStyle(Ink.white)
+                let fl = store.freezesLeft(purchases.freezeAllowance)
+                Text("\(fl) freeze\(fl == 1 ? "" : "s") left").font(.ui(13, .heavy)).foregroundStyle(Ink.white)
                 Spacer()
                 if store.repairCredits > 0 {
                     Image(systemName: "bandage.fill").font(.system(size: 13, weight: .black)).foregroundStyle(Ink.patch)
@@ -490,9 +513,7 @@ struct HabitEditor: View {
         .sheet(item: $paywall) { r in Paywall(reason: r).presentationBackground(Ink.bg).presentationDetents([.large]) }
         .confirmationDialog("Delete \(habit.name)?", isPresented: $confirmDelete, titleVisibility: .visible) {
             Button("Delete habit and its history", role: .destructive) {
-                store.habits.removeAll { $0.id == habit.id }
-                for k in store.log.keys { store.log[k]?.removeAll { $0 == habit.id } }
-                store.save(); dismiss()
+                store.delete(habit); dismiss()
             }
         } message: { Text("Archive keeps the history and hides the habit. Delete removes both.") }
     }

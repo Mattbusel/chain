@@ -50,6 +50,18 @@ struct CloseButton: View {
     }
 }
 
+/// A pill marking what Chain Plus adds.
+struct PlusTag: View {
+    var body: some View {
+        HStack(spacing: 3) {
+            Image(systemName: "sparkles").font(.system(size: 8, weight: .black))
+            Text("PLUS").font(.ui(9, .black)).tracking(1)
+        }
+        .foregroundStyle(Ink.bg).padding(.horizontal, 6).padding(.vertical, 3)
+        .background(Capsule().fill(LinearGradient(colors: [Ink.lime, Ink.amber], startPoint: .leading, endPoint: .trailing)))
+    }
+}
+
 /// A pill naming what Chain Unlimited adds, on a locked control.
 struct ProTag: View {
     var body: some View {

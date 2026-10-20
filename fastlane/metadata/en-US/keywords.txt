@@ -1,1 +1,1 @@
-goals,quit,sober,counter,checklist,planner,productivity,discipline,reminder,water,reading,meditate
+goals,quit,sober,counter,checklist,planner,challenge,discipline,reminder,water,reading,meditate,todo

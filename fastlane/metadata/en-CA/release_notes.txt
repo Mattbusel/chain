@@ -1,0 +1,14 @@
+Chain 1.3 is the biggest update yet.
+
+• Monthly challenges: one habit, one month, four days in five wins the badge. This month's is open to everyone
+• Milestones at 7, 30, 100 and 365 days, with an image to share
+• Insights: this month against last, habits that lift each other, your best time of day, and your next milestones
+• Log Next Habit in Control Centre, on the Lock Screen and the Action button
+• Best Chain widget for the Home Screen and StandBy, plus an inline Lock Screen count
+• Siri: "How's my chain?"
+• Chain Plus, a new monthly or yearly plan: everything in Unlimited plus three Streak Repairs every month, five freezes a month, every theme and the full challenge library. Unlimited stays a one-time unlock
+• Freeze Pack: three freezes that never expire
+• Larger text support, VoiceOver labels and smoother check-offs
+• Fixed: logging a past day of an amount habit now fills the whole target, and deleting a habit removes all of its history
+
+Everything you've logged carries over.

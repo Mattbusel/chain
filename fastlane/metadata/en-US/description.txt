@@ -1,10 +1,16 @@
 Chain is the habit tracker that takes five seconds a day and makes your progress impossible to ignore. Tick a habit off, watch the ring fill, and keep the chain going. Every habit gets a year of squares stitched like a quilt: colour where you did it, a hole where you didn't.
 
-Free to start. One unlock for everything. No subscription, ever.
+NEW IN 1.3
+• A challenge every month: one habit, one month, four days in five wins the badge. This month's challenge is open to everyone
+• Milestone moments at 7, 30, 100 and 365 days, with an image to share
+• Insights: this month against last, the habits that lift each other, your best time of day and when each chain hits its next milestone
+• Log Next Habit in Control Center, on the Lock Screen and on the Action button
+• A Best Chain widget that looks great in StandBy, and a Lock Screen line under the clock
+• Ask Siri "How's my chain?"
 
 TICK IT OFF FROM ANYWHERE
 • Home Screen widgets you can tap: tick a habit off without opening the app
-• A Lock Screen ring with today's count
+• Lock Screen ring, line and inline count
 • "Log Read in Chain" with Siri, or the Log a habit shortcut
 • A reminder with a Done button that stays quiet on days you've already done it
 
@@ -26,13 +32,16 @@ SEE YOUR YEAR
 • Stats on your best and worst weekdays, perfect days and longest chains
 • Notes on any day, and a shareable image of your chain
 
-MAKE IT YOURS
-• Five colour themes, each with a matching app icon, 99 cents each
-• Celebrations for every clean sweep
+PLANS
+• Free: three habits, the month's challenge (it doesn't count toward the three), the Next Up and Best Chain widgets, the Lock Screen ring, a daily check-in reminder, the last 90 days of the quilt, one freeze a month, quit counters, notes, Siri and Control Center
+• Chain Unlimited, one payment, yours for good: unlimited habits, every widget, a reminder per habit, amounts and Apple Health, three freezes a month and pauses, the whole quilt, iCloud backup and CSV export
+• Chain Plus, monthly or yearly: everything in Unlimited, plus three Streak Repairs at the start of every month, five freezes a month, every theme and celebration, the whole challenge library any time, and Insights. Yearly starts with a 1-week free trial for new subscribers
+• Small extras: Streak Repair and Freeze Pack, five colour themes with matching app icons, and the celebration pack
+• Bought Chain before it went free? Unlimited is already yours
 
-FREE AND UNLIMITED
-• Free: three habits, the Next Up widget and Lock Screen ring, a daily check-in reminder, the last 90 days of the quilt, one freeze a month, quit counters, notes and Siri
-• Chain Unlimited, one payment: unlimited habits, every widget, a reminder per habit, amounts and Apple Health, three freezes a month and pauses, the whole quilt, iCloud backup and CSV export
-• Bought Chain before it went free? Everything is already unlocked for you
+Chain Plus is an auto-renewing subscription. Payment is charged to your Apple ID at confirmation of purchase (after the free trial, if you start one). It renews automatically at the same price unless cancelled at least 24 hours before the end of the current period, and your account is charged for renewal within 24 hours before the end of the period. Manage or cancel any time in your App Store account settings. Any unused part of a free trial ends when you subscribe.
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Privacy Policy: https://tensorust.com/apps/chain/privacy/
 
 No account, no ads, no tracking. Your habits stay on your iPhone, and in your own iCloud if you turn backup on.

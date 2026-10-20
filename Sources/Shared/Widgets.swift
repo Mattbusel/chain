@@ -23,6 +23,26 @@ struct ToggleHabitIntent: AppIntent {
     }
 }
 
+/// Control Center, the Action button and Shortcuts: tick off the next habit still due today.
+struct LogNextHabitIntent: AppIntent {
+    static var title: LocalizedStringResource = "Log next habit"
+    static var description = IntentDescription("Ticks off the next Chain habit still due today.")
+    init() {}
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        let s = Store(demo: false)
+        guard let h = s.dueToday.first(where: { !s.satisfiedToday($0) }) else {
+            return .result(dialog: s.dueToday.isEmpty ? "Nothing is due today." : "Clean sweep. Everything is done today.")
+        }
+        s.markDone(h, Day.today)
+        s.saveNow()
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["chain-\(h.id)-\(Day.today)"])
+        WidgetCenter.shared.reloadAllTimelines()
+        let left = s.dueToday.filter { !s.satisfiedToday($0) }.count
+        let line = "\(h.emoji) \(h.name) is done. " + (left == 0 ? "Clean sweep!" : "\(left) to go.")
+        return .result(dialog: "\(line)")
+    }
+}
+
 struct WidgetRow: Identifiable, Hashable {
     let id: UUID
     let name: String
@@ -215,13 +235,38 @@ struct LockRectView: View {
     }
 }
 
+/// Small, free: the longest chain going, big, over twelve weeks of the quilt. Reads well in StandBy.
+struct BestChainView: View {
+    let snap: Snapshot
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 4) {
+                Image(systemName: "flame.fill").font(.system(size: 11, weight: .black)).foregroundStyle(Ink.lime)
+                Text("BEST CHAIN").font(.ui(9, .black)).tracking(1.5).foregroundStyle(Ink.dim)
+            }
+            Text("\(snap.topStreak)").font(.system(size: 44, weight: .black, design: .rounded)).foregroundStyle(Ink.lime).minimumScaleFactor(0.6).lineLimit(1)
+            Text(snap.topStreak > 0 ? snap.topName : "Tick a habit to start").font(.ui(11, .heavy)).foregroundStyle(Ink.white).lineLimit(1)
+            Spacer(minLength: 2)
+            MiniQuilt(values: Array(snap.quilt.suffix(35))).frame(height: 30)
+        }
+    }
+}
+
+struct LockInlineView: View {
+    let snap: Snapshot
+    var body: some View {
+        if let n = snap.next { Text("\(snap.done)/\(snap.due) · Next: \(n.name)") }
+        else { Text(snap.topStreak > 0 ? "Clean sweep · \(snap.topStreak) day chain" : "\(snap.done)/\(snap.due) done") }
+    }
+}
+
 /// What a locked widget shows on the free plan.
 struct LockedWidgetView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Image(systemName: "lock.fill").font(.system(size: 16, weight: .black)).foregroundStyle(Ink.lime)
             Text("Chain Unlimited").font(.ui(15, .heavy)).foregroundStyle(Ink.white)
-            Text("This widget comes with the one-time unlock. The Next Up widget is free.").font(.ui(11, .semibold)).foregroundStyle(Ink.grey)
+            Text("This widget comes with Unlimited or Plus. Next Up and Best Chain are free.").font(.ui(11, .semibold)).foregroundStyle(Ink.grey)
             Spacer(minLength: 0)
         }.frame(maxWidth: .infinity, alignment: .leading)
     }

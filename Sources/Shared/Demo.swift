@@ -22,7 +22,9 @@ enum Demo {
             for (hi, h) in s.habits.enumerated() where d >= h.start && h.kind == .build {
                 if h.frequency == .days && !h.days.contains(Day.dow(d)) { continue }
                 // The last few weeks are the streak the screenshots show off.
-                if rnd() < p[hi] + (i < 40 ? 0.12 : 0) || (hi == 0 && i < 47) {
+                // Meditating follows running: the pair Insights finds.
+                let pr = hi == 3 ? (s.done(s.habits[2], d) ? 0.95 : 0.5) : p[hi] + (i < 40 ? 0.12 : 0)
+                if rnd() < pr || (hi == 0 && i < 47) {
                     if h.target > 1 { s.setCount(h, d, h.target + (h.health != nil ? Int(rnd() * 3000) : 0)) } else { s.setDone(h, d, true) }
                 } else if h.target > 1 {
                     s.setCount(h, d, Int(Double(h.target) * rnd() * 0.8))
@@ -45,7 +47,18 @@ enum Demo {
         s.notes[Day.add(t, -3)] = [s.habits[0].id.uuidString: "Only 12 pages, but it counts."]
         s.notes[Day.add(t, -2)] = [s.habits[3].id.uuidString: "Calmer before the meeting."]
         s.freezeSpend[Day.month(t)] = 1
-        s.repairCredits = 0
+        s.repairCredits = 3
+        s.plusRefill = Day.month(t)
+        // This month's challenge, joined on the 1st, mostly kept.
+        let c = Challenges.featured(t)
+        let first = String(t.prefix(7)) + "-01"
+        let h = Habit(name: c.habit, emoji: c.emoji, frequency: .daily, start: first, part: c.part, challenge: c.id)
+        s.habits.append(h)
+        var d = first
+        while d < t { if rnd() < 0.88 { s.setDone(h, d, true) }; d = Day.add(d, 1) }
+        s.runs = [ChallengeRun(challenge: c.id, habit: h.id, from: first, to: Challenges.monthEnd(t), goal: Challenges.goal(from: first, to: Challenges.monthEnd(t)))]
+        // An earlier month's badge.
+        s.runs.insert(ChallengeRun(challenge: Challenges.featured(Day.add(first, -1)).id, habit: s.habits[0].id, from: String(Day.add(first, -1).prefix(7)) + "-01", to: Day.add(first, -1), goal: 24, won: true), at: 0)
     }
 
     /// A chain that broke yesterday, for the rescue screenshot.
