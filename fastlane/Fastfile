@@ -163,6 +163,24 @@ platform :ios do
     )
   end
 
+  desc "Build and upload only the binary; leave the App Store listing exactly as it is in Connect"
+  lane :binary_only do
+    # For fixes to a version whose listing was edited through the API: the
+    # repo's fastlane/metadata may be older than what is live in Connect, so it
+    # must not be pushed. Attach the build and submit through the API after.
+    build
+    upload_to_app_store(
+      api_key: asc_key,
+      app_identifier: APP_IDENTIFIER,
+      ipa: "build/Chain.ipa",
+      skip_metadata: true,
+      skip_screenshots: true,
+      submit_for_review: false,
+      force: true,
+      precheck_include_in_app_purchases: false
+    )
+  end
+
   desc "Everything except the irreversible last step"
   lane :dry_run do
     build

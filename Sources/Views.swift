@@ -541,7 +541,7 @@ struct HabitEditor: View {
             Picker("", selection: $habit.part) { ForEach(Part.allCases, id: \.self) { p in Text(p.title).tag(p) } }.pickerStyle(.segmented)
         }
         VStack(alignment: .leading, spacing: 10) {
-            HStack { Eyebrow("Amount"); if !purchases.unlocked { ProTag() } }
+            HStack { Eyebrow(Health.available ? "Amount and Apple Health" : "Amount"); if !purchases.unlocked { ProTag() } }
             Toggle(isOn: Binding(get: { habit.target > 1 || habit.health != nil }, set: { on in
                 if on && !purchases.unlocked { paywall = .amounts; return }
                 if on { habit.target = 8; habit.unit = habit.unit.isEmpty ? "times" : habit.unit } else { habit.target = 1; habit.health = nil }
@@ -558,7 +558,11 @@ struct HabitEditor: View {
                 }
                 if Health.available {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Fill it from Apple Health").font(.ui(13, .heavy)).foregroundStyle(Ink.grey)
+                        HStack(spacing: 6) {
+                            Image(systemName: "heart.fill").foregroundStyle(Color(red: 1.0, green: 0.18, blue: 0.33))
+                            Text("Apple Health").font(.ui(13, .heavy)).foregroundStyle(Ink.white)
+                            Text("fill it in automatically").font(.ui(13, .medium)).foregroundStyle(Ink.grey)
+                        }
                         Picker("", selection: Binding(get: { habit.health }, set: { m in
                             habit.health = m
                             if let m { habit.target = m.defaultTarget; habit.unit = m.unit; habit.step = max(1, m.defaultTarget / 10); Task { _ = await Health.authorize([m]) } }

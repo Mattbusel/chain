@@ -19,6 +19,7 @@ on:
           - compile       # build + unit tests, ~3 min, no simulator screenshots
           - dry_run       # build, sign, upload; do not submit
           - release       # everything, including submit for review
+          - binary_only   # build, sign, upload the binary only; listing untouched, no submit
 
 jobs:
   ship:
@@ -91,7 +92,7 @@ jobs:
           xcodebuild build -project Chain.xcodeproj -scheme Chain             -destination "platform=iOS Simulator,name=$SIM_NAME" CODE_SIGNING_ALLOWED=NO | xcpretty
 
       - name: Write the signing key to disk
-        if: ${{ inputs.action == 'dry_run' || inputs.action == 'release' }}
+        if: ${{ inputs.action == 'dry_run' || inputs.action == 'release' || inputs.action == 'binary_only' }}
         run: |
           # xcodebuild reads the key from a file path, not an environment
           # variable. RUNNER_TEMP is wiped with the job and is outside the
@@ -101,7 +102,7 @@ jobs:
           echo "ASC_KEY_PATH=$RUNNER_TEMP/AuthKey.p8" >> "$GITHUB_ENV"
 
       - name: Import the signing certificate
-        if: ${{ inputs.action == 'dry_run' || inputs.action == 'release' }}
+        if: ${{ inputs.action == 'dry_run' || inputs.action == 'release' || inputs.action == 'binary_only' }}
         env:
           DIST_CERT_P12: ${{ secrets.DIST_CERT_P12 }}
           DIST_CERT_PASSWORD: ${{ secrets.DIST_CERT_PASSWORD }}
@@ -127,7 +128,7 @@ jobs:
           security find-identity -v -p codesigning "$keychain"
 
       - name: Build, upload and submit
-        if: ${{ inputs.action == 'dry_run' || inputs.action == 'release' }}
+        if: ${{ inputs.action == 'dry_run' || inputs.action == 'release' || inputs.action == 'binary_only' }}
         run: fastlane ${{ inputs.action }}
 
       - name: Keep the logs

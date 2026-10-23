@@ -436,6 +436,17 @@ struct SettingsSheet: View {
                     GreyButton(title: "Reorder and archive habits", icon: "line.3.horizontal") { manage = true }
                 }.tile()
 
+                if Health.available {
+                    // Apple Health, named and shown plainly (App Review 2.5.1): what Chain reads, that it never
+                    // writes, and one button to grant access.
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack { Eyebrow("Apple Health"); if !purchases.unlocked { ProTag() }; Spacer() }
+                        row("heart.fill", Color(red: 1.0, green: 0.18, blue: 0.33), "Works with Apple Health", "Chain can read your steps, exercise minutes, mindful minutes and workouts from the Health app and tick those habits off for you. It only reads, never writes to Health, and nothing leaves your iPhone.")
+                        GreyButton(title: "Connect Apple Health", icon: "heart") { Task { _ = await Health.authorize(HealthMetric.allCases) } }
+                        Text("Then open a habit, turn on Count toward a target, and pick a number under Apple Health. Change access any time in the Health app: Sharing, Apps, Chain.").font(.ui(11, .medium)).foregroundStyle(Ink.dim)
+                    }.tile()
+                }
+
                 VStack(alignment: .leading, spacing: 8) {
                     Eyebrow("Widgets and Siri")
                     Text("Touch and hold your Home Screen, tap Edit, then Add Widget, and pick Chain. Next Up, Best Chain and the Lock Screen ring are free; Today and the Lock Screen line come with Unlimited or Plus.").font(.ui(13, .medium)).foregroundStyle(Ink.grey)
